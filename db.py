@@ -1,3 +1,19 @@
+from pymongo import MongoClient
+import logging
+
+# Create a logger
+logger = logging.getLogger("db")
+
+def getCollection():
+    # Create a connection using MongoClient. This will connect to the default host and port.
+    client = MongoClient()
+
+    # Access database
+    spotifyDB = client['SpotifyRec']  # Replace 'mydatabase' with your database name
+
+    # Access collection of the database
+    return spotifyDB['RawSpotifySongs']  # Replace 'mycollection' with your collection name
+
 # Function to add a song if it doesn't exist in the database
 def add_song_if_not_exists(collection, song_data):
     try: 
@@ -6,9 +22,9 @@ def add_song_if_not_exists(collection, song_data):
             if collection.find_one({"track_id": song["track_id"]}) is None:
                 # Song doesn't exist, so add it
                 collection.insert_one(song)
-                print(f"Song added: {song['track_id']}")
+                logger.info(f"Song added: {song['track_id']}")
             else:
                 # Song already exists
-                print(f"Song already exists: {song['track_id']}")
+                logger.info(f"Song already exists: {song['track_id']}")
     except Exception as e:
-        print(f"Error Storing Song in Database: {e}")
+        logger.error(f"Error Storing Song in Database: {e}")

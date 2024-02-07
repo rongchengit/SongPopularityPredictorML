@@ -1,42 +1,42 @@
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-from pymongo import MongoClient
-from db import add_song_if_not_exists
-from spotify import getSongData
+from db import add_song_if_not_exists, getCollection
+from spotify import addAudioFeatures, addRecommendations, getGenres
+import logging
 
-client_id = '98d7d7247b8e4cb3a1c7f6257ee1fa61'
-client_secret = 'ab96f6f8fb9141edae374086459e3047'
+# Configure logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    handlers=[
+                        logging.FileHandler("app.log"),
+                        logging.StreamHandler()
+                    ])
 
-client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+# Create a logger
+logger = logging.getLogger("main")
 
-# Create a connection using MongoClient. This will connect to the default host and port.
-client = MongoClient()
-
-# Access database
-spotifyDB = client['SpotifyRec']  # Replace 'mydatabase' with your database name
-
-# Access collection of the database
-songCollection = spotifyDB['RawSpotifySongs']  # Replace 'mycollection' with your collection name
+# Get Database
+songCollection = getCollection()
 
 # Get all available genre seeds
-genres = sp.recommendation_genre_seeds()['genres']
-# TODO remove this - only for testing
-genres = [genres[0]]
+genres = getGenres()
+
+# Store new Songs
+song_list = []
 
 # Get recommendations for each genre
 for genre in genres:
     try:
-        print(f"Fetching recommendations for genre: {genre}")
-        recommendations = sp.recommendations(seed_genres=[genre], limit=100)
-        songData = getSongData(recommendations, genre)
-        print(songData)
-    except Exception as e:
-        print(f"Error fetching recommendations for genre {genre}: {e}")
-    add_song_if_not_exists(songCollection, songData)
+        logger.info(f"Fetching recommendations for genre: {genre}")
 
-print("finish")
-# # Example of calling an endpoint
-# track_id = '2XpV9sHBexcNrz0Gyf3l18'
-# features = sp.audio_features([track_id])
-# print(features)
+        # Fetch Song Recommendations
+        addRecommendations(song_list, genre)
+    
+        # Fetch Audio Features for all track IDs
+        addAudioFeatures(song_list)
+    except Exception as e:
+        logger.error(f"Error fetching recommendations for genre {genre}: {e}")
+
+    # Store Songs    
+    add_song_if_not_exists(songCollection, song_list)
+
+logger.info("finish")
