@@ -1,5 +1,5 @@
-from db import add_song_if_not_exists, getCollection
-from spotify import addAudioFeatures, addRecommendations, getGenres
+from src.common.db import add_song_if_not_exists, getCollection
+from src.gathering.spotify import addAudioFeatures, addRecommendations, getGenres
 import logging
 
 # Configure logging
