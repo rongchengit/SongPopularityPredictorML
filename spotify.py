@@ -1,4 +1,3 @@
-from time import sleep
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import logging
@@ -14,10 +13,10 @@ client_secret = 'c13c36ea2749445f9e53897ce9ba0d84'
 # Constants
 TRACK_ID = "track_id"
 attributes = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'valence','duration_ms','key','loudness','mode','speechiness','tempo','time_signature']
-recommendationAttributes = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'valence','mode','speechiness'] # TODO if error persist check this (it works when only the first one is set)
+recommendationAttributes = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'valence', 'mode', 'speechiness']
 
 client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager, retries=0, requests_timeout=5)
 
 def getGenres():
     return sp.recommendation_genre_seeds()['genres']
@@ -61,17 +60,14 @@ def get_randomized_parameters():
     for attribute in recommendationAttributes:
         get_param(params, attribute, 0.0, 1.0, 1)
     
+    # Other attributes
     get_param(params, 'key', 0, 11, 0)
-    get_param(params, 'popuarity', 0, 100, 0)
+    get_param(params, 'popularity', 0, 100, 0)
     
     return params
 
 def get_param(params, attribute, min, max, nDigits):
-    min_val = custom_round(random.uniform(min, max - 0.1), nDigits)  # Ensure there's space for max_val
-    max_val = custom_round(random.uniform(min_val + 0.1, max), nDigits)  # Ensure max_val is greater than min_val
-    target_val = custom_round(random.uniform(min_val, max_val), nDigits)
-    params[f'min_{attribute}'] = min_val
-    params[f'max_{attribute}'] = max_val
+    target_val = custom_round(random.uniform(min, max), nDigits)
     params[f'target_{attribute}'] = target_val
 
 def custom_round(value, digits):

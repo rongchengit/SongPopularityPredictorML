@@ -29,7 +29,8 @@ for genre in genres:
         logger.info(f"Fetching recommendations for genre: {genre}")
 
         # Fetch Song Recommendations
-        addRecommendations(song_list, genre)
+        while len(song_list) == 0:
+            addRecommendations(song_list, genre)
     
         # Fetch Audio Features for all track IDs
         addAudioFeatures(song_list)
