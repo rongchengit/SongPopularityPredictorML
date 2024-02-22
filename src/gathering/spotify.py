@@ -13,7 +13,7 @@ client_secret = 'c13c36ea2749445f9e53897ce9ba0d84'
 # Constants
 TRACK_ID = "track_id"
 attributes = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'valence','duration_ms','key','loudness','mode','speechiness','tempo','time_signature']
-recommendationAttributes = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'valence', 'mode', 'speechiness']
+recommendationAttributes = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'valence', 'speechiness']
 
 client_credentials_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
 sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager, retries=0, requests_timeout=5)
@@ -61,6 +61,7 @@ def get_randomized_parameters():
         get_param(params, attribute, 0.0, 1.0, 1)
     
     # Other attributes
+    get_param(params, 'mode', 0, 1, 0)
     get_param(params, 'key', 0, 11, 0)
     get_param(params, 'popularity', 0, 100, 0)
     

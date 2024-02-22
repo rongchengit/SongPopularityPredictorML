@@ -40,4 +40,7 @@ for genre in genres:
     # Store Songs    
     add_song_if_not_exists(songCollection, song_list)
 
+    # Reset List
+    song_list = []
+
 logger.info("finish")
