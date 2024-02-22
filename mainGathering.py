@@ -3,7 +3,7 @@ from src.gathering.spotify import addAudioFeatures, addRecommendations, getGenre
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.WARN,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     handlers=[
