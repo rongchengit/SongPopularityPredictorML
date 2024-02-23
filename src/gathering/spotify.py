@@ -27,11 +27,15 @@ def addRecommendations(song_list, genre):
 
     recommendations = sp.recommendations(seed_genres=[genre], limit=100, **params)
     for track in recommendations['tracks']:
+        
         song_data = {
             TRACK_ID: track['id'],
             "duration_ms": track['duration_ms'],
             "popularity": track['popularity'],
-            "genre": [genre]
+            "genre": genre, # limiting it to genre we search by
+            "artists": [artist['id'] for artist in track['artists']],
+            "release_date": track['album']['release_date'],
+            "explicit": track['explicit']
         }
         song_list.append(song_data)
 
