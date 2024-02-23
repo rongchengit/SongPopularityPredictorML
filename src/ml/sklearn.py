@@ -1,5 +1,4 @@
-from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
@@ -12,16 +11,20 @@ import pandas as pd
 logger = logging.getLogger("dataframe")
 
 def prepareData(df):
-    #not needed for training
+    # Not needed for training
     df.drop('_id', axis=1, inplace=True)
     df.drop('track_id', axis=1, inplace=True)
 
-    #conver to a single value list and conver to numerical
-    df['genre'] = df['genre'].apply(lambda x: x[0] if x else None)
-    # Initialize the LabelEncoder
+    df.drop('artists', axis=1, inplace=True)
+
+    #df[['year', 'month', 'day']] = df.apply(lambda row: extract_date_parts(row['release_date']), axis=1, result_type="expand")
+    df['year'] = df.apply(lambda row: extract_date_parts(row['release_date'])[0], axis=1, result_type="expand")
+    df.drop('release_date', axis=1, inplace=True)
+
+    # Change genre to numerical
     le = LabelEncoder()
     df['genre'] = le.fit_transform(df['genre'])
-
+    df.drop('genre', axis=1, inplace=True)
     # Log Dataframe for debugging
     logging.debug(f"\n{df.head().to_string()}")
 
@@ -80,3 +83,20 @@ def recommend_songs(track_id, df, n_recommendations=5):
     else:
         print(f"No track found with ID: {track_id}")
         return []
+    
+# Normalize date function to ensure it's in 'YYYY-MM-DD' format, ignoring time
+def extract_date_parts(date_str):
+    parts = date_str.split('-')
+    year = month = day = None  # Default values
+
+    if len(parts) == 3:  # Year-Month-Day
+        year, month, day = parts
+    elif len(parts) == 2:  # Year-Month or Year-Day
+        year, month = parts
+        day = 1  # Default day if missing
+    else:  # Year or other formats
+        year = parts[0]
+        month = 1  # Default month if missing
+        day = 1  # Default day if missing
+
+    return int(year), int(month), int(day)

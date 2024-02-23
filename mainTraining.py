@@ -5,12 +5,12 @@ from src.ml.sklearn import prepareData, storeModel, trainModel, recommend_songs
 import logging
 from src.ml.models import ModelType
 
-#MODEL_TYPES = [ModelType.LINEAR_REGRESSION, ModelType.RANDOM_FOREST_CLASSIFIER, ModelType.RANDOM_FOREST_REGRESSOR, ModelType.SVR]
+MODEL_TYPES = [ModelType.LINEAR_REGRESSION, ModelType.RANDOM_FOREST_CLASSIFIER, ModelType.RANDOM_FOREST_REGRESSOR, ModelType.SVR]
 #MODEL_TYPES = [ModelType.GRADIANT_BOOSTING_REGRESSOR]
-MODEL_TYPES = []
+#MODEL_TYPES = []
 
 # Configure logging
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     handlers=[
@@ -29,7 +29,7 @@ data = list(songCollection.find())
 df = pd.DataFrame(data)
 
 # Get Recommended Songs (has nothing to do with mainTraining)
-logger.info(recommend_songs('6UFhNbE4sLRUoM52kC4Xl4', df))
+# logger.info(recommend_songs('6UFhNbE4sLRUoM52kC4Xl4', df))
 
 # Get prapared Training Data
 x_train, x_test, y_train, y_test = prepareData(df)
@@ -40,4 +40,3 @@ for modelType in MODEL_TYPES:
     model = trainModel(x_train, y_train, modelType)
     storeModel(model, modelType.name)
     evaluateModel(model, x_test, y_test)
-    logger.info("=========================")
