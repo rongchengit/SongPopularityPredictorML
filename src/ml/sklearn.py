@@ -15,7 +15,7 @@ def prepareData(df):
     df.drop('_id', axis=1, inplace=True)
     df.drop('track_id', axis=1, inplace=True)
 
-    df.drop('artists', axis=1, inplace=True)
+    df.drop('artists', axis=1, inplace=True) #TODO: labelencoder
 
     #df[['year', 'month', 'day']] = df.apply(lambda row: extract_date_parts(row['release_date']), axis=1, result_type="expand")
     df['year'] = df.apply(lambda row: extract_date_parts(row['release_date'])[0], axis=1, result_type="expand")
