@@ -7,8 +7,8 @@ import random
 logger = logging.getLogger("spotify")
 
 # Spotify Web Credentials
-client_id = 'a58b70de4d8b4024a8647572414d02b7'
-client_secret = 'c13c36ea2749445f9e53897ce9ba0d84'
+client_id = '629b5c57d3954496b28cd613ee0d4a15'
+client_secret = '2a03f58c4a3c481e919bb487cd551a84'
 
 # Constants
 TRACK_ID = "track_id"

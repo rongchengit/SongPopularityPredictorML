@@ -1,3 +1,5 @@
+import random
+import time
 from src.common.db import add_song_if_not_exists, getCollection
 from src.gathering.spotify import addAudioFeatures, addRecommendations, getGenres
 import logging
@@ -51,5 +53,7 @@ while not stop: # Loop until we encounter the rate limit
 
         if stop:
             break
+        
+        time.sleep(random.uniform(5, 15)) 
 
 logger.info("finish")
