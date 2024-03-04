@@ -7,8 +7,8 @@ import random
 logger = logging.getLogger("spotify")
 
 # Spotify Web Credentials
-client_id = '629b5c57d3954496b28cd613ee0d4a15'
-client_secret = '2a03f58c4a3c481e919bb487cd551a84'
+client_id = 'fd3b07d793b34e15a55a81274c317dce'
+client_secret = 'a3d9c969b8b64b9087b785ca9075e579'
 
 # Constants
 TRACK_ID = "track_id"
@@ -39,13 +39,35 @@ def addRecommendations(song_list, genre):
         }
         song_list.append(song_data)
 
+def addSearchedSongs(song_list, genre, trackName):
+    songs = sp.search(q=f"track:{trackName}* genre:{genre}", limit=50)
+
+    tracks = songs['tracks']['items']
+    if len(tracks) == 0:
+        return
+
+    for track in songs['tracks']['items']:
+        song_data = {
+            TRACK_ID: track['id'],
+            "duration_ms": track['duration_ms'],
+            "popularity": track['popularity'],
+            "genre": genre, # limiting it to genre we search by
+            "artists": [artist['id'] for artist in track['artists']],
+            "release_date": track['album']['release_date'],
+            "explicit": track['explicit']
+        }
+        song_list.append(song_data)
+
 def addAudioFeatures(song_list):
     track_ids = [track[TRACK_ID] for track in song_list]
 
     # Split up audiofeatures request in 2 separate ones due to spotify answering with http code 414
-    audio_features1 = sp.audio_features(track_ids[:50])
-    audio_features2 = sp.audio_features(track_ids[50:100])
-    audio_features = audio_features1 + audio_features2
+    if len(track_ids) <= 50:
+        audio_features = sp.audio_features(track_ids)
+    else:
+        audio_features1 = sp.audio_features(track_ids[:50])
+        audio_features2 = sp.audio_features(track_ids[50:100])
+        audio_features = audio_features1 + audio_features2
     
     # Iterate over each song in songData
     for song in song_list:
