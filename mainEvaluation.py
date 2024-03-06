@@ -1,14 +1,15 @@
 import pandas as pd
+from src.ml.evaluation import evaluateModel
 from src.common.db import getCollection
-from src.ml.sklearn import prepareData, storeModel, trainModel
-import logging
 from src.ml.models import ModelType
+from src.ml.sklearn import saveEvaluation, loadModel, prepareData
+import logging
 
 MODEL_TYPES = [ModelType.LINEAR_REGRESSION, ModelType.RANDOM_FOREST_CLASSIFIER, ModelType.RANDOM_FOREST_REGRESSOR, ModelType.SVR]
-#MODEL_TYPES = [ModelType.GRADIANT_BOOSTING_REGRESSOR]
+#MODEL_TYPES = [ModelType.LINEAR_REGRESSION]
 #MODEL_TYPES = []
 
-# Configure logging
+# Configure logging 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -20,21 +21,17 @@ logging.basicConfig(level=logging.DEBUG,
 # Create a logger
 logger = logging.getLogger("main")
 
-#Data Prep
-# Get Database
+#Prep Data
 songCollection = getCollection()
-# Convert into pandas dataframe
 data = list(songCollection.find())
 df = pd.DataFrame(data)
-
-# Get prapared Training Data
 x_train, x_test, y_train, y_test = prepareData(df)
 
-# Get Recommended Songs (has nothing to do with mainTraining)
-# logger.info(recommend_songs('6UFhNbE4sLRUoM52kC4Xl4', df))
-
-# Loop through all wanted models
 for modelType in MODEL_TYPES:
-    logger.info("=========================")
-    model = trainModel(x_train, y_train, modelType)
-    storeModel(model, modelType.name)
+    logger.info(f"=========================Evaluating {modelType.name}=========================")
+    model = loadModel(modelType.name)
+    if model:
+        evaluationMetrics = evaluateModel(model, x_test, y_test)
+        saveEvaluation(evaluationMetrics, modelType.name)
+    else:
+        logger.error(f"Failed to load model {modelType.name}")

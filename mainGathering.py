@@ -1,4 +1,3 @@
-from src.gathering.recommendation import searchByRecommendation
 from src.gathering.search import searchByTrackName
 from src.common.db import getCollection
 import logging
@@ -20,6 +19,6 @@ songCollection = getCollection()
 
 # Different methods to get random spread of songs
 #searchByRecommendation(songCollection)
-searchByTrackName(songCollection, 'death-metal')
+searchByTrackName(songCollection, 'disco', 'ae')
 
 logger.info("finish")

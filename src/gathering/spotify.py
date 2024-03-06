@@ -7,8 +7,8 @@ import random
 logger = logging.getLogger("spotify")
 
 # Spotify Web Credentials
-client_id = 'fd3b07d793b34e15a55a81274c317dce'
-client_secret = 'a3d9c969b8b64b9087b785ca9075e579'
+client_id = '7b9f51495f7548ea97e37c0f5efc98fe'
+client_secret = '35874886cf3e4b52841bbb2f6c04e7fc'
 
 # Constants
 TRACK_ID = "track_id"
@@ -42,8 +42,8 @@ def addRecommendations(song_list, genre):
 def addSearchedSongs(song_list, genre, trackName):
     songs = sp.search(q=f"track:{trackName}* genre:{genre}", limit=50)
 
-    tracks = songs['tracks']['items']
-    if len(tracks) == 0:
+    if songs is None or 'tracks' not in songs or 'items' not in songs['tracks']:
+        logger.warning(f"No tracks found for genre {genre} and letter {trackName}")
         return
 
     for track in songs['tracks']['items']:

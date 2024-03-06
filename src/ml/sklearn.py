@@ -6,6 +6,7 @@ import joblib
 import logging
 import os
 import pandas as pd
+import json #added by chen
 
 # Create a logger
 logger = logging.getLogger("dataframe")
@@ -49,7 +50,30 @@ def storeModel(model, name):
     full_path = os.path.join(directory, model_filename)
     joblib.dump(model, full_path)
     logger.debug(f'Model saved to {full_path}')
-   
+
+def loadModel(name):
+    directory = 'trainedModels'
+    model_filename = name + '.joblib'
+    full_path = os.path.join(directory, model_filename)
+
+    if os.path.exists(full_path):
+        model = joblib.load(full_path)
+        logger.info(f'Model loaded from {full_path}')
+        return model
+    else:
+        logger.error(f'Model file {full_path} not found.')
+        return None
+
+def saveEvaluation(evaluationMetrics, model_type):
+    directory = 'evaluationResults'
+    # Ensure the directory exists
+    os.makedirs(directory, exist_ok=True)
+    results_filename = f"{model_type}_evaluation.json"
+    full_path = os.path.join(directory, results_filename)
+    with open(full_path, 'w') as file:
+        json.dump(evaluationMetrics, file, indent=4)
+    logger.debug(f'Evaluation results saved to {full_path}')
+
 def recommend_songs(track_id, df, n_recommendations=5):
 
     # Example weights (make sure to align these with your actual feature columns)
