@@ -33,8 +33,10 @@ x_train, x_test, y_train, y_test = prepareData(df)
 # Get Recommended Songs (has nothing to do with mainTraining)
 # logger.info(recommend_songs('6UFhNbE4sLRUoM52kC4Xl4', df))
 
+version = None
+
 # Loop through all wanted models
 for modelType in MODEL_TYPES:
     logger.info("=========================")
     model = trainModel(x_train, y_train, modelType)
-    storeModel(model, modelType.name)
+    version = storeModel(model, modelType.name, len(x_train), version)

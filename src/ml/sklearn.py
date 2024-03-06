@@ -42,37 +42,88 @@ def trainModel(x, y, modelType):
     model.fit(x, y)
     return model
 
-def storeModel(model, name):
-    directory = 'trainedModels'
-    # Ensure the directory exists
-    os.makedirs(directory, exist_ok=True)
+def storeModel(model, name, dataset_length, version=None):
+    base_directory = 'trainedModels'
+    version_directory, version = getVersionDirectory(base_directory, version)
+    
     model_filename = name + '.joblib'
-    full_path = os.path.join(directory, model_filename)
+    full_path = os.path.join(version_directory, model_filename)
     joblib.dump(model, full_path)
+    
+    metadata_filename = 'metadata.json'
+    metadata_path = os.path.join(version_directory, metadata_filename)
+    
+    if not os.path.exists(metadata_path):
+        metadata = {'Dataset Length': dataset_length}
+        with open(metadata_path, 'w') as file:
+            json.dump(metadata, file, indent=4)
+        logger.debug(f'Metadata saved to {metadata_path}')
+    
     logger.debug(f'Model saved to {full_path}')
+    
+    return version
 
-def loadModel(name):
+def saveEvaluation(evaluationMetrics, model_type, version=None):
+    base_directory = 'evaluationResults'
+    
+    version_directory, version = getVersionDirectory(base_directory, version)
+    
+    results_filename = f"{model_type}_evaluation.json"
+    full_path = os.path.join(version_directory, results_filename)
+    
+    with open(full_path, 'w') as file:
+        json.dump(evaluationMetrics, file, indent=4)
+    
+    logger.debug(f'Evaluation results saved to {full_path}')
+    return version
+    
+# Load the model via name (by default gets the newest model version)
+def loadModel(name, version=None):
     directory = 'trainedModels'
+    
+    if version is None:
+        # If no version is specified, find the latest version directory
+        version_dirs = [d for d in os.listdir(directory) if d.startswith('v')]
+        if not version_dirs:
+            logger.error(f'No model versions found in {directory}.')
+            return None, None
+        version = max(version_dirs)
+    
+    version_directory = os.path.join(directory, version)
     model_filename = name + '.joblib'
-    full_path = os.path.join(directory, model_filename)
-
+    full_path = os.path.join(version_directory, model_filename)
+    
     if os.path.exists(full_path):
         model = joblib.load(full_path)
         logger.info(f'Model loaded from {full_path}')
-        return model
+        return model, version
     else:
         logger.error(f'Model file {full_path} not found.')
-        return None
+        return None, None
 
-def saveEvaluation(evaluationMetrics, model_type):
-    directory = 'evaluationResults'
-    # Ensure the directory exists
-    os.makedirs(directory, exist_ok=True)
-    results_filename = f"{model_type}_evaluation.json"
-    full_path = os.path.join(directory, results_filename)
-    with open(full_path, 'w') as file:
-        json.dump(evaluationMetrics, file, indent=4)
-    logger.debug(f'Evaluation results saved to {full_path}')
+def getVersionDirectory(base_directory, version=None):
+    # Ensure the base directory exists
+    os.makedirs(base_directory, exist_ok=True)
+    
+    if version is None:
+        # Find the next available version directory
+        version = 1
+        while True:
+            version_directory = os.path.join(base_directory, f'v{version}')
+            if not os.path.exists(version_directory):
+                break
+            version += 1
+    else:
+        if isinstance(version, str) and version.startswith('v'):
+            # Extract the numeric version from the string
+            version = int(version[1:])
+        
+        version_directory = os.path.join(base_directory, f'v{version}')
+    
+    # Create the version directory if it doesn't exist
+    os.makedirs(version_directory, exist_ok=True)
+    
+    return version_directory, f'v{version}'
 
 def recommend_songs(track_id, df, n_recommendations=5):
 

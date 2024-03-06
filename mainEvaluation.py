@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     handlers=[
-                        logging.FileHandler("app.log"),
+                        logging.FileHandler('app.log', encoding='utf-8'),
                         logging.StreamHandler()
                     ])
 
@@ -29,9 +29,9 @@ x_train, x_test, y_train, y_test = prepareData(df)
 
 for modelType in MODEL_TYPES:
     logger.info(f"=========================Evaluating {modelType.name}=========================")
-    model = loadModel(modelType.name)
+    model, version = loadModel(modelType.name)
     if model:
         evaluationMetrics = evaluateModel(model, x_test, y_test)
-        saveEvaluation(evaluationMetrics, modelType.name)
+        version = saveEvaluation(evaluationMetrics, modelType.name, version)
     else:
         logger.error(f"Failed to load model {modelType.name}")
