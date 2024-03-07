@@ -4,8 +4,8 @@ from src.ml.sklearn import prepareData, storeModel, trainModel
 import logging
 from src.ml.models import ModelType
 
-MODEL_TYPES = [ModelType.LINEAR_REGRESSION, ModelType.RANDOM_FOREST_CLASSIFIER, ModelType.RANDOM_FOREST_REGRESSOR, ModelType.SVR]
-#MODEL_TYPES = [ModelType.GRADIANT_BOOSTING_REGRESSOR]
+#MODEL_TYPES = [ModelType.LINEAR_REGRESSION, ModelType.RANDOM_FOREST_CLASSIFIER, ModelType.RANDOM_FOREST_REGRESSOR, ModelType.SVR, ModelType.GRADIANT_BOOSTING_REGRESSOR]
+MODEL_TYPES = [ModelType.RANDOM_FOREST_CLASSIFIER]
 #MODEL_TYPES = []
 
 # Configure logging

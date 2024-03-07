@@ -4,9 +4,10 @@ from src.common.db import getCollection
 from src.ml.models import ModelType
 from src.ml.sklearn import saveEvaluation, loadModel, prepareData
 import logging
+import numpy as np
 
-MODEL_TYPES = [ModelType.LINEAR_REGRESSION, ModelType.RANDOM_FOREST_CLASSIFIER, ModelType.RANDOM_FOREST_REGRESSOR, ModelType.SVR]
-#MODEL_TYPES = [ModelType.LINEAR_REGRESSION]
+#MODEL_TYPES = [ModelType.LINEAR_REGRESSION, ModelType.RANDOM_FOREST_CLASSIFIER, ModelType.RANDOM_FOREST_REGRESSOR, ModelType.SVR]
+MODEL_TYPES = [ModelType.RANDOM_FOREST_CLASSIFIER]
 #MODEL_TYPES = []
 
 # Configure logging 
@@ -31,7 +32,9 @@ for modelType in MODEL_TYPES:
     logger.info(f"=========================Evaluating {modelType.name}=========================")
     model, version = loadModel(modelType.name)
     if model:
-        evaluationMetrics = evaluateModel(model, x_test, y_test)
+        evaluationMetrics, y_pred = evaluateModel(model, x_test, y_test)
         version = saveEvaluation(evaluationMetrics, modelType.name, version)
+        np.save('predictions.npy', y_pred)
+        np.save('testData.npy', y_test)
     else:
         logger.error(f"Failed to load model {modelType.name}")

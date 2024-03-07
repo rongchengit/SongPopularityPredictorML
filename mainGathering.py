@@ -19,6 +19,6 @@ songCollection = getCollection()
 
 # Different methods to get random spread of songs
 #searchByRecommendation(songCollection)
-searchByTrackName(songCollection, 'electronic', 'bz')
+searchByTrackName(songCollection, 'french', 'da')
 
 logger.info("finish")

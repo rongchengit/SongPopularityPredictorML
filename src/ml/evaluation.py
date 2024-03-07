@@ -13,17 +13,16 @@ TOLERANCE = 5
 
 def evaluateModel(model, x, y):
     evaluation_metrics = {}
-    sklearn_metrics = sklearnEvaluations(model, x, y)
-    accuracy_metric = accuracyEvaluation(model, x, y)
+    y_pred = model.predict(x)
+    sklearn_metrics = sklearnEvaluations(y_pred, y)
+    accuracy_metric = accuracyEvaluation(y_pred, y)
 
     evaluation_metrics.update(sklearn_metrics)
     evaluation_metrics.update(accuracy_metric)
 
-    return evaluation_metrics
+    return evaluation_metrics, y_pred
 
-def accuracyEvaluation(model, x, y):
-    y_pred = model.predict(x)
-
+def accuracyEvaluation(y_pred, y):
     # Calculate the number of predictions within the tolerance level of the true values
     correct_predictions = np.abs(y - y_pred) <= TOLERANCE
 
@@ -34,9 +33,7 @@ def accuracyEvaluation(model, x, y):
 
     return {'Accuracy (tolerance: {})'.format(TOLERANCE): correct_percentage}
 
-def sklearnEvaluations(model, x_test, y_test):
-    y_pred = model.predict(x_test)
-
+def sklearnEvaluations(y_pred, y_test):
     mse = mean_squared_error(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
