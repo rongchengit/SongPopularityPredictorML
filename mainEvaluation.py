@@ -34,7 +34,13 @@ for modelType in MODEL_TYPES:
     if model:
         evaluationMetrics, y_pred = evaluateModel(model, x_test, y_test)
         version = saveEvaluation(evaluationMetrics, modelType.name, version)
+        audioFeatureRanges = {col: (x_train.loc[x_train[col] != 0, col].min() if col == 'year' else x_train[col].min(), x_train[col].max()) for col in x_train.columns}
         np.save('predictions.npy', y_pred)
         np.save('testData.npy', y_test)
+        np.save('audioRanges', audioFeatureRanges)
     else:
         logger.error(f"Failed to load model {modelType.name}")
+
+
+        
+        
