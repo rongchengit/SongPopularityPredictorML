@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from src.common.db import getCollection
 from src.ml.sklearn import prepareData
-
+from sklearn.inspection import permutation_importance #added for SVR
 from lime import lime_tabular
 
 # Configure logging 
@@ -24,15 +24,7 @@ logging.basicConfig(level=logging.DEBUG,
 
 # Create a logger
 logger = logging.getLogger("main")
-#make a map where the key is the attribute names for key and the values should be a object of min and max 
-#so acoustics min:1 max:100 
-# Prep Data
-# songCollection = getCollection()
-# data = list(songCollection.find())
-# df = pd.DataFrame(data)
-# x_train, x_test, y_train, y_test = prepareData(df)
 
-#attributes = ['acousticness', 'danceability', 'energy', 'instrumentalness', 'liveness', 'valence','duration_ms','key','loudness','mode','speechiness','tempo','time_signature']
 # Load the audioRanges.npy file
 audio_ranges_data = np.load('audioRanges.npy', allow_pickle=True).item()
 
@@ -42,12 +34,9 @@ audioFeatureRange = {attr: {'min': audio_ranges_data[attr][0], 'max': audio_rang
 Y_test = np.load('testData.npy')
 
 @st.cache_resource
-def load_model():
-    model, version = loadModel(ModelType.RANDOM_FOREST_CLASSIFIER.name)
+def load_model(selected_model_type):
+    model, version = loadModel(selected_model_type.name)
     return model
-
-# Load the model
-model = load_model()
 
 # Make predictions
 Y_test_preds = np.load('predictions.npy')
@@ -56,16 +45,82 @@ Y_test_preds = np.load('predictions.npy')
 st.title("PENIS :red[Prediction] :bar_chart: :chart_with_upwards_trend: :tea: :eggplant:")
 st.markdown("Predict Wine Type using Ingredients Values")
 
+selected_model_type = st.selectbox("Select Model Type", list(ModelType))
+# Load the model
+model = load_model(selected_model_type)
+
 tab1, tab2, tab3 = st.tabs(["important tab", "Penis indicator","penis graph"])
 
 with tab1:
     st.header("Feature Importances")
     feat_imp_fig, ax1 = plt.subplots(figsize=(8, 6))  # Adjust the figsize as needed
-    skplt.estimators.plot_feature_importances(model.named_steps['randomforestclassifier'], 
-                                            feature_names=model.feature_names_in_, 
-                                            ax=ax1, x_tick_rotation=70)
-    st.pyplot(feat_imp_fig, use_container_width=True)
+    if selected_model_type == ModelType.LINEAR_REGRESSION:
+        # Get the linear classifier model from the pipeline
+        model_named_steps = model.named_steps[selected_model_type.name.lower().replace("_", "")]
+        # Get the coefficients of the linear classifier
+        coefficients = model_named_steps.coef_
 
+        # Check if coefficients is a single value or an array
+        if isinstance(coefficients, np.float64):
+            # If it's a single value, convert it to a list
+            coefficients = [coefficients]
+        else:
+            # If it's an array, flatten it to a 1D list
+            coefficients = coefficients.flatten().tolist()
+
+        # Calculate the absolute values of the coefficients
+        abs_coefficients = [abs(coef) for coef in coefficients]
+
+        # Normalize the absolute coefficients to get the feature importances
+        feature_importances = [coef / sum(abs_coefficients) for coef in abs_coefficients]
+
+        # Sort the feature importances and feature names in descending order
+        sorted_indices = np.argsort(feature_importances)[::-1]
+        sorted_importances = [feature_importances[i] for i in sorted_indices]
+        sorted_feature_names = [model.feature_names_in_[i] for i in sorted_indices]
+
+        # Create a bar plot of the feature importances
+        ax1.bar(range(len(sorted_importances)), sorted_importances)
+
+        # Set the x-tick labels to the feature names
+        ax1.set_xticks(range(len(sorted_importances)))
+        ax1.set_xticklabels(sorted_feature_names, rotation=70)
+
+        # Set the plot title and labels
+        ax1.set_title("Feature Importances")
+        ax1.set_xlabel("Features")
+        ax1.set_ylabel("Importance")
+
+        st.pyplot(feat_imp_fig, use_container_width=True)
+    elif selected_model_type == ModelType.GRADIANT_BOOSTING_REGRESSOR:
+        # Get the feature importances from the model
+        feature_importances = model.feature_importances_
+
+        # Sort the feature importances and feature names in descending order
+        sorted_indices = np.argsort(feature_importances)[::-1]
+        sorted_importances = feature_importances[sorted_indices]
+        sorted_feature_names = [model.feature_names_in_[i] for i in sorted_indices]
+
+        # Create a bar plot of the sorted feature importances
+        ax1.bar(range(len(sorted_importances)), sorted_importances)
+
+        # Set the x-tick labels to the sorted feature names
+        ax1.set_xticks(range(len(sorted_importances)))
+        ax1.set_xticklabels(sorted_feature_names, rotation=70)
+
+        # Set the plot title and labels
+        ax1.set_title("Feature Importances")
+        ax1.set_xlabel("Features")
+        ax1.set_ylabel("Importance")
+
+        st.pyplot(feat_imp_fig, use_container_width=True)
+    else:
+        # Get the linear classifier model from the pipeline
+        model_named_steps = model.named_steps[selected_model_type.name.lower().replace("_", "")]
+        skplt.estimators.plot_feature_importances(model_named_steps, 
+                                                feature_names=model.feature_names_in_, 
+                                                ax=ax1, x_tick_rotation=70)
+        st.pyplot(feat_imp_fig, use_container_width=True)
 
 with tab2:
     st.header("Classification Report")
@@ -77,7 +132,7 @@ with tab3:
     col1, col2 = st.columns(2)
     with col1:
         for audioFeature in model.feature_names_in_:
-            if audioFeature == 'explicit':
+            if audioFeature == 'explicit' or audioFeature == 'mode':
                 # Boolean feature
                 checkbox_value = st.checkbox(label=audioFeature)
                 sliders.append(1 if checkbox_value else 0)
@@ -93,8 +148,8 @@ with tab3:
                 min_minutes, min_seconds = divmod(min_duration, 60)
                 max_minutes, max_seconds = divmod(max_duration, 60)
                 duration_str = st.text_input(
-                    label="Duration",
-                    value=f'{(min_minutes + max_minutes) // 2:02d}:{(min_seconds + max_seconds) // 2:02d}'
+                    label="Song Duration",
+                    value= '3:00'
                 )
                 if duration_str:
                     try:
@@ -115,12 +170,17 @@ with tab3:
                     st.warning('Please enter a duration.')
             else:
                 # Numeric feature
-                min_value = float(audioFeatureRange[audioFeature]['min'])
-                max_value = float(audioFeatureRange[audioFeature]['max'])
-                median_value = (min_value + max_value) / 2
-                ing_slider = st.slider(label=audioFeature, min_value=min_value, max_value=max_value, value=median_value)
-                sliders.append(ing_slider)
-            
+                if audioFeature == 'key' or audioFeature == 'time_signature':
+                    min_value = int(audioFeatureRange[audioFeature]['min'])
+                    max_value = int(audioFeatureRange[audioFeature]['max'])
+                    median_value = round((min_value + max_value) / 2)
+                    ing_slider = st.slider(label=audioFeature, min_value=min_value, max_value=max_value, value=median_value, step=1)
+                else:
+                    min_value = float(audioFeatureRange[audioFeature]['min'])
+                    max_value = float(audioFeatureRange[audioFeature]['max'])
+                    median_value = (min_value + max_value) / 2
+                    ing_slider = st.slider(label=audioFeature, min_value=min_value, max_value=max_value, value=median_value)
+                sliders.append(ing_slider)    
 
     with col2:
         col1, col2 = st.columns(2, gap="medium")
@@ -129,25 +189,13 @@ with tab3:
         popularity = prediction[0]  # Get the predicted popularity value
         
         with col1:
-            st.markdown("### Model Prediction: <strong style='color:tomato;'>{:.2f}</strong>".format(popularity), unsafe_allow_html=True)
+            print(popularity)
+            st.markdown("### Model Prediction: <strong style='color:tomato;'>{:d}</strong>".format(int(popularity)), unsafe_allow_html=True)
         
         with col2:
-            probs = model.predict_proba([sliders])
-            probability = probs[0][1]  # Assuming the positive class is at index 1
-            st.metric(label="Model Confidence", value="{:.2f} %".format(probability*100), delta="{:.2f} %".format((probability-0.5)*100))
-
-        # explainer = lime_tabular.LimeTabularExplainer(x_train.values, mode="regression", feature_names=model.feature_names_in_)
-
-        # # Reshape the sliders to a 2D array with shape (1, num_features)
-        # instance = np.array(sliders).reshape(1, -1)
-
-        # # Check if the number of features in the instance matches the expected number of features
-        # if instance.shape[1] != len(model.feature_names_in_):
-        #     raise ValueError(f"The number of features in the instance ({instance.shape[1]}) does not match the expected number of features ({len(model.feature_names_in_)}).")
-
-        # # Ensure that the predict function returns a 1D array
-        # prediction = model.predict(instance).flatten()
-
-        # explanation = explainer.explain_instance(instance[0], model.predict, num_features=len(model.feature_names_in_))
-        # interpretation_fig = explanation.as_pyplot_figure(label=prediction[0])
-        # st.pyplot(interpretation_fig, use_container_width=True)
+            if selected_model_type == ModelType.RANDOM_FOREST_CLASSIFIER:
+                probs = model.predict_proba([sliders])
+                probability = probs[0][1]  # Assuming the positive class is at index 1
+                st.metric(label="Model Confidence", value="{:.2f} %".format(probability*100), delta="{:.2f} %".format((probability-0.5)*100))
+            else:
+                st.metric(label="Model Confidence", value="NaN")

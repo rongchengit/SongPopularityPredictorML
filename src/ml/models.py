@@ -8,5 +8,5 @@ class ModelType(Enum):
     RANDOM_FOREST_CLASSIFIER = RandomForestClassifier(random_state=42)
     RANDOM_FOREST_REGRESSOR = RandomForestRegressor(random_state=42)
     LINEAR_REGRESSION = LinearRegression()
-    SVR = SVR(C=1.0, epsilon=0.2)
+    SVR = SVR(C=1.0, epsilon=0.2) # TODO train different kernels and do the respective graphing
     GRADIANT_BOOSTING_REGRESSOR = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
