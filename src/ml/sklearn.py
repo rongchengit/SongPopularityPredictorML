@@ -12,6 +12,7 @@ import json #added by chen
 logger = logging.getLogger("dataframe")
 
 #TODO: double check genre to see if it's working
+#TODO: graph for exploratory data to see some outliers to get rid of ex)years that end in 0 which is techincally NA
 def prepareData(df):
     # Not needed for training
     df.drop('_id', axis=1, inplace=True)
@@ -77,7 +78,16 @@ def saveEvaluation(evaluationMetrics, model_type, version=None):
     
     logger.debug(f'Evaluation results saved to {full_path}')
     return version
+
+def getVersions():
+    directory = 'trainedModels'
+    versions = [d for d in os.listdir(directory) if d.startswith('v')]
     
+    # Sort the versions in descending order
+    sorted_versions = sorted(versions, key=lambda x: int(x[1:]), reverse=True)
+    
+    return sorted_versions
+
 # Load the model via name (by default gets the newest model version)
 def loadModel(name, version=None):
     directory = 'trainedModels'

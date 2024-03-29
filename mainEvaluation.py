@@ -6,8 +6,7 @@ from src.ml.sklearn import saveEvaluation, loadModel, prepareData
 import logging
 import numpy as np
 
-#MODEL_TYPES = [ModelType.LINEAR_REGRESSION, ModelType.RANDOM_FOREST_CLASSIFIER, ModelType.RANDOM_FOREST_REGRESSOR, ModelType.SVR]
-MODEL_TYPES = [ModelType.RANDOM_FOREST_CLASSIFIER]
+MODEL_TYPES = list(ModelType)
 #MODEL_TYPES = []
 
 # Configure logging 
