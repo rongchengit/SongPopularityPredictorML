@@ -11,6 +11,7 @@ import json #added by chen
 # Create a logger
 logger = logging.getLogger("dataframe")
 
+#TODO: double check genre to see if it's working
 def prepareData(df):
     # Not needed for training
     df.drop('_id', axis=1, inplace=True)
