@@ -6,28 +6,41 @@ import joblib
 import logging
 import os
 import pandas as pd
-import json #added by chen
+import json
 
 # Create a logger
 logger = logging.getLogger("dataframe")
 
-#TODO: double check genre to see if it's working
-#TODO: graph for exploratory data to see some outliers to get rid of ex)years that end in 0 which is techincally NA
 def prepareData(df):
-    # Not needed for training
+       # Not needed for training
     df.drop('_id', axis=1, inplace=True)
     df.drop('track_id', axis=1, inplace=True)
 
-    df.drop('artists', axis=1, inplace=True) #TODO: labelencoder
+    le_artists = LabelEncoder()
+    df['artists'] = df['artists'].apply(lambda x: ','.join(x))  # Convert artist array to comma-separated string
+    df['artists'] = le_artists.fit_transform(df['artists'])
 
-    #df[['year', 'month', 'day']] = df.apply(lambda row: extract_date_parts(row['release_date']), axis=1, result_type="expand")
     df['year'] = df.apply(lambda row: extract_date_parts(row['release_date'])[0], axis=1, result_type="expand")
     df.drop('release_date', axis=1, inplace=True)
 
+    #---------------------------------------------------------------- removing outliers from duration
+    Q1 = df['duration_ms'].quantile(0.25)
+    Q3 = df['duration_ms'].quantile(0.75)
+    IQR = Q3 - Q1
+
+    # Define the outlier threshold
+    outlier_threshold = 1.5
+
+    # Filter out the outliers
+    df = df[~((df['duration_ms'] < (Q1 - outlier_threshold * IQR)) | (df['duration_ms'] > (Q3 + outlier_threshold * IQR)))]
+    #------------------------------------------------------------------
     # Change genre to numerical
     le = LabelEncoder()
     df['genre'] = le.fit_transform(df['genre'])
-    df.drop('genre', axis=1, inplace=True)
+
+    # Create a dictionary to map genre names to their encoded values
+    genre_mapping = dict(zip(le.classes_, le.transform(le.classes_)))
+
     # Log Dataframe for debugging
     logging.debug(f"\n{df.head().to_string()}")
 
@@ -36,7 +49,7 @@ def prepareData(df):
     y = df['popularity']
 
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42) 
-    return x_train, x_test, y_train, y_test
+    return df, x_train, x_test, y_train, y_test, genre_mapping
 
 def trainModel(x, y, modelType):
     logger.info(f'Training {modelType.name} Model')

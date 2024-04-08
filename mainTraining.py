@@ -5,7 +5,7 @@ import logging
 from src.ml.models import ModelType
 
 MODEL_TYPES = list(ModelType)
-#MODEL_TYPES = []
+#MODEL_TYPES = [ModelType.SVR]
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG,
@@ -27,7 +27,7 @@ data = list(songCollection.find())
 df = pd.DataFrame(data)
 
 # Get prapared Training Data
-x_train, x_test, y_train, y_test = prepareData(df)
+df, x_train, x_test, y_train, y_test, genre = prepareData(df)
 
 # Get Recommended Songs (has nothing to do with mainTraining)
 # logger.info(recommend_songs('6UFhNbE4sLRUoM52kC4Xl4', df))

@@ -13,6 +13,7 @@ TOLERANCE = 5
 
 def evaluateModel(model, x, y):
     evaluation_metrics = {}
+    print(x)
     y_pred = model.predict(x)
     sklearn_metrics = sklearnEvaluations(y_pred, y)
     accuracy_metric = accuracyEvaluation(y_pred, y)

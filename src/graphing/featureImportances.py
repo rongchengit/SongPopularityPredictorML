@@ -1,8 +1,17 @@
 import numpy as np
 import streamlit as st
-import scikitplot as skplt
+import plotly.graph_objects as go
 
-def graphLinearRegression(model, selected_model_type, ax1, feat_imp_fig):
+def updateLayout(fig,selected_model_type):
+
+    fig.update_layout(
+        title=f"Feature Importances for {selected_model_type}",
+        xaxis_title="Importance",
+        yaxis_title="Features",
+        yaxis=dict(autorange="reversed")  # Invert the y-axis to show the most important feature at the top
+    )
+
+def graphLinearRegression(model, selected_model_type):
     # Get the linear classifier model from the pipeline
     model_named_steps = model.named_steps[selected_model_type.lower().replace("_", "")]
     # Get the coefficients of the linear classifier
@@ -27,46 +36,90 @@ def graphLinearRegression(model, selected_model_type, ax1, feat_imp_fig):
     sorted_importances = [feature_importances[i] for i in sorted_indices]
     sorted_feature_names = [model.feature_names_in_[i] for i in sorted_indices]
 
-    # Create a bar plot of the feature importances
-    ax1.bar(range(len(sorted_importances)), sorted_importances)
+    fig = go.Figure(data=[
+        go.Bar(
+            x=sorted_importances,
+            y=sorted_feature_names,
+            orientation='h',
+            marker=dict(color=sorted_importances, colorscale='Viridis'),
+            text=[f"{imp:.2f}" for imp in sorted_importances],
+            textposition='auto'
+        )
+    ])
 
-    # Set the x-tick labels to the feature names
-    ax1.set_xticks(range(len(sorted_importances)))
-    ax1.set_xticklabels(sorted_feature_names, rotation=70)
+    updateLayout(fig,selected_model_type)
 
-    # Set the plot title and labels
-    ax1.set_title("Feature Importances")
-    ax1.set_xlabel("Features")
-    ax1.set_ylabel("Importance")
+    st.plotly_chart(fig)
 
-    st.pyplot(feat_imp_fig, use_container_width=True)
-
-def graphGradientBoostingRegressor(model, ax1, feat_imp_fig):
+def graphGradientBoostingRegressor(model, selected_model_type):
     # Get the feature importances from the model
-    feature_importances = model.feature_importances_
+    feature_importances = model.named_steps[selected_model_type.lower().replace("_", "")].feature_importances_
 
     # Sort the feature importances and feature names in descending order
     sorted_indices = np.argsort(feature_importances)[::-1]
     sorted_importances = feature_importances[sorted_indices]
     sorted_feature_names = [model.feature_names_in_[i] for i in sorted_indices]
+    
+    fig = go.Figure(data=[
+        go.Bar(
+            x=sorted_importances,
+            y=sorted_feature_names,
+            orientation='h',
+            marker=dict(color=sorted_importances, colorscale='Viridis'),
+            text=[f"{imp:.2f}" for imp in sorted_importances],
+            textposition='auto'
+        )
+    ])
+    
+    updateLayout(fig, selected_model_type)
+    st.plotly_chart(fig)
 
-    # Create a bar plot of the sorted feature importances
-    ax1.bar(range(len(sorted_importances)), sorted_importances)
+def graphSVR(model, selected_model_type, result):
+    # Get the feature importances and their standard deviations
+    importances = result.importances_mean
+    std = result.importances_std
 
-    # Set the x-tick labels to the sorted feature names
-    ax1.set_xticks(range(len(sorted_importances)))
-    ax1.set_xticklabels(sorted_feature_names, rotation=70)
+    # Sort the feature importances and feature names in descending order
+    sorted_indices = np.argsort(importances)[::-1]
+    sorted_importances = [importances[i] for i in sorted_indices]
+    sorted_feature_names = [model.feature_names_in_[i] for i in sorted_indices]
+    
+    fig = go.Figure(data=[
+        go.Bar(
+            x=sorted_importances,
+            y=sorted_feature_names,
+            orientation='h',
+            marker=dict(color=sorted_importances, colorscale='Viridis'),
+            text=[f"{imp:.2f} ± {std[i]:.2f}" for i, imp in zip(sorted_indices, sorted_importances)],
+            textposition='auto'
+        )
+    ])
+    
+    updateLayout(fig, selected_model_type)
+    st.plotly_chart(fig)
 
-    # Set the plot title and labels
-    ax1.set_title("Feature Importances")
-    ax1.set_xlabel("Features")
-    ax1.set_ylabel("Importance")
-
-    st.pyplot(feat_imp_fig, use_container_width=True)
-
-def graphLinearModels(model, selected_model_type, ax1, feat_imp_fig):
+def graphLinearModels(model, selected_model_type):
+    # Get the Random Forest model from the pipeline
     model_named_steps = model.named_steps[selected_model_type.lower().replace("_", "")]
-    skplt.estimators.plot_feature_importances(model_named_steps, 
-                                            feature_names=model.feature_names_in_, 
-                                            ax=ax1, x_tick_rotation=70)
-    st.pyplot(feat_imp_fig, use_container_width=True)
+    
+    # Get the feature importances from the Random Forest model
+    importances = model_named_steps.feature_importances_
+    
+    # Sort the feature importances and feature names in descending order
+    sorted_indices = np.argsort(importances)[::-1]
+    sorted_importances = [importances[i] for i in sorted_indices]
+    sorted_feature_names = [model.feature_names_in_[i] for i in sorted_indices]
+    
+    fig = go.Figure(data=[
+        go.Bar(
+            x=sorted_importances,
+            y=sorted_feature_names,
+            orientation='h',
+            marker=dict(color=sorted_importances, colorscale='Viridis'),
+            text=[f"{imp:.2f}" for imp in sorted_importances],
+            textposition='auto'
+        )
+    ])
+    
+    updateLayout(fig, selected_model_type)
+    st.plotly_chart(fig)

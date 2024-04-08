@@ -11,5 +11,5 @@ class ModelType(Enum):
     LINEAR_REGRESSION = LinearRegression()
     DECISION_TREE_CLASSIFIER = DecisionTreeClassifier()
     DECISION_TREE_REGRESSOR = DecisionTreeRegressor()
-    SVR = SVR(C=1.0, epsilon=0.2)
-    GRADIANT_BOOSTING_REGRESSOR = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
+    SVR = SVR(C=1.0, epsilon=0.2, kernel='linear')
+    GRADIENT_BOOSTING_REGRESSOR = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)

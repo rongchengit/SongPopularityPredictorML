@@ -7,7 +7,7 @@ import logging
 import numpy as np
 
 MODEL_TYPES = list(ModelType)
-#MODEL_TYPES = []
+#MODEL_TYPES = [ModelType.SVR]
 
 # Configure logging 
 logging.basicConfig(level=logging.DEBUG,
@@ -25,7 +25,7 @@ logger = logging.getLogger("main")
 songCollection = getCollection()
 data = list(songCollection.find())
 df = pd.DataFrame(data)
-x_train, x_test, y_train, y_test = prepareData(df)
+df, x_train, x_test, y_train, y_test, genre = prepareData(df)
 
 for modelType in MODEL_TYPES:
     logger.info(f"=========================Evaluating {modelType.name}=========================")
@@ -34,6 +34,12 @@ for modelType in MODEL_TYPES:
         evaluationMetrics, y_pred = evaluateModel(model, x_test, y_test)
         version = saveEvaluation(evaluationMetrics, modelType.name, version)
         audioFeatureRanges = {col: (x_train.loc[x_train[col] != 0, col].min() if col == 'year' else x_train[col].min(), x_train[col].max()) for col in x_train.columns}
+
+        #if modelType == ModelType.SVR:
+        #    model_named_steps = model.named_steps[ModelType.SVR.name.lower().replace("_", "")]
+        #    result = permutation_importance(model_named_steps, model.named_steps['standardscaler'].transform(x_test), y_test, n_repeats=5, random_state=42)
+        #    np.save('svrFeatureImportance.npy', result)
+
         np.save('predictions.npy', y_pred)
         np.save('testData.npy', y_test)
         np.save('audioRanges', audioFeatureRanges)

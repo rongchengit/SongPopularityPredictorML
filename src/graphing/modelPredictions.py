@@ -12,12 +12,12 @@ def graphFeatureImportance(model, sliders):
         if audioFeature == 'explicit' or audioFeature == 'mode':
             # Boolean feature
             checkbox_value = st.checkbox(label=audioFeature)
-            sliders.append(1 if checkbox_value else 0)
+            sliders[audioFeature] = 1 if checkbox_value else 0
         elif audioFeature == 'year':
             min_year = int(audioFeatureRange['year']['min'])
             max_year = int(audioFeatureRange['year']['max'])
-            year_value = st.number_input(label='Year', min_value=min_year, max_value=max_year, step=1, value=int((min_year + max_year) / 2))
-            sliders.append(year_value)
+            year_value = st.number_input(label='year', min_value=min_year, max_value=max_year, step=1, value=int((min_year + max_year) / 2))
+            sliders[audioFeature] = year_value
         elif audioFeature == 'duration_ms':
             # Duration feature (converted to minutes and seconds)
             min_duration = int(audioFeatureRange['duration_ms']['min'] / 1000)  # Convert milliseconds to seconds
@@ -40,7 +40,7 @@ def graphFeatureImportance(model, sliders):
                         st.warning('Please enter a duration within the valid range.')
                     else:
                         duration_ms = (duration_minutes * 60 + duration_seconds) * 1000  # Convert back to milliseconds
-                        sliders.append(duration_ms)
+                        sliders[audioFeature] = duration_ms
                 except (ValueError, IndexError):
                     st.warning('Please enter the duration in the format MM:SS.')
             else:
@@ -57,7 +57,7 @@ def graphFeatureImportance(model, sliders):
                 max_value = float(audioFeatureRange[audioFeature]['max'])
                 median_value = (min_value + max_value) / 2
                 ing_slider = st.slider(label=audioFeature, min_value=min_value, max_value=max_value, value=median_value)
-            sliders.append(ing_slider)    
+            sliders[audioFeature] = ing_slider
 
 def graphRandomForestClassifierConfidence(model, sliders):
     probs = model.predict_proba([sliders])
