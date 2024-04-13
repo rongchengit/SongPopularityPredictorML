@@ -4,6 +4,7 @@ import time
 from src.common.db import add_song_if_not_exists
 from src.gathering.spotify import addAudioFeatures, addSearchedSongs, getGenres
 import string
+import wordfreq
 
 # Create a logger
 logger = logging.getLogger("searchByTrack")
@@ -20,7 +21,7 @@ def generate_two_letter_combos(start_combo=None):
 
     return two_letter_combos
 
-def searchByTrackName(songCollection, targetGenre=None, start_combo="aa"):
+def searchByTrackName(songCollection, targetGenre=None, byWord=False, start_combo="aa"):
     # Store new Songs
     song_list = []
 
@@ -39,10 +40,14 @@ def searchByTrackName(songCollection, targetGenre=None, start_combo="aa"):
                 else:
                     continue
 
-            # List of lowercase letters
-            two_letter_combos = generate_two_letter_combos(start_combo)
-            
-            for letter in two_letter_combos:
+            letters = []
+            if byWord == False:
+                # List of lowercase letters
+                letters = generate_two_letter_combos(start_combo)
+            else:
+                letters = wordfreq.top_n_list("en", 1000)
+    
+            for letter in letters:
                 try:
                     logger.info(f"Fetching tracks {genre} and letter: {letter}")
                     

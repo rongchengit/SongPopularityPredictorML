@@ -1,5 +1,6 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 import logging
+from src.common.fileManagment import getVersions, loadMetadata
 
 # Create a logger
 logger = logging.getLogger("db")
@@ -28,3 +29,13 @@ def add_song_if_not_exists(collection, song_data):
                 logger.info(f"Song already exists: {song['track_id']}")
     except Exception as e:
         logger.error(f"Error Storing Song in Database: {e}")
+
+def loadDBData(version: None):
+    if version is None:
+        version = getVersions()[-1]
+
+    metadata = loadMetadata(version)
+
+    songCollection = getCollection()
+    return list(songCollection.find().sort([("$natural", ASCENDING)]).limit(metadata.get('datasetLen')))
+    

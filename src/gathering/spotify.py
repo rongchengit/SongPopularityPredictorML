@@ -40,7 +40,7 @@ def addRecommendations(song_list, genre):
         song_list.append(song_data)
 
 def addSearchedSongs(song_list, genre, trackName):
-    songs = sp.search(q=f"track:{trackName}* genre:{genre}", limit=50)
+    songs = sp.search(q=f"track:*{trackName}* genre:{genre}", limit=50)
 
     if songs is None or 'tracks' not in songs or 'items' not in songs['tracks']:
         logger.warning(f"No tracks found for genre {genre} and letter {trackName}")

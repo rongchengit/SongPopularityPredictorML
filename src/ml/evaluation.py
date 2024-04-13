@@ -4,16 +4,16 @@ import numpy as np
 import logging
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 from prettytable import PrettyTable
+from src.common.fileManagment import EVALUATION_RESULTS_DIRECTORY, getVersions
 
 # Create a logger
 logger = logging.getLogger("evaluation")
 
-BASE_DIRECTORY = 'evaluationResults'
 TOLERANCE = 5
 
 def evaluateModel(model, x, y):
     evaluation_metrics = {}
-    print(x)
+  
     y_pred = model.predict(x)
     sklearn_metrics = sklearnEvaluations(y_pred, y)
     accuracy_metric = accuracyEvaluation(y_pred, y)
@@ -51,8 +51,7 @@ def compareEvaluations(model_type, version1=None, version2=None):
     
     if version1 is None and version2 is None:
         # If no versions are specified, find the two newest versions
-        version_dirs = [d for d in os.listdir(BASE_DIRECTORY) if d.startswith('v')]
-        version_dirs.sort(reverse=True)
+        version_dirs = getVersions()
         
         if len(version_dirs) < 2:
             logger.info("Not enough versions available for comparison.")
@@ -63,8 +62,8 @@ def compareEvaluations(model_type, version1=None, version2=None):
     results_filename = f"{model_type}_evaluation.json"
     metadata_filename = "metadata.json"
     
-    full_path1 = os.path.join(BASE_DIRECTORY, version1, results_filename)
-    full_path2 = os.path.join(BASE_DIRECTORY, version2, results_filename)
+    full_path1 = os.path.join(EVALUATION_RESULTS_DIRECTORY, version1, results_filename)
+    full_path2 = os.path.join(EVALUATION_RESULTS_DIRECTORY, version2, results_filename)
     metadata_path1 = os.path.join(base_directory_training, version1, metadata_filename)
     metadata_path2 = os.path.join(base_directory_training, version2, metadata_filename)
     
@@ -82,8 +81,8 @@ def compareEvaluations(model_type, version1=None, version2=None):
             metadata2 = json.load(file2)
         logger.debug(f"Metadata for {version1}: {metadata1}")
         logger.debug(f"Metadata for {version2}: {metadata2}")
-        dataset_length1 = metadata1.get('Dataset Length', 'Unknown')
-        dataset_length2 = metadata2.get('Dataset Length', 'Unknown')
+        dataset_length1 = metadata1.get('datasetLen', 'Unknown')
+        dataset_length2 = metadata2.get('datasetLen', 'Unknown')
     else:
         dataset_length1 = 'Unknown'
         dataset_length2 = 'Unknown'
@@ -114,22 +113,3 @@ def compareEvaluations(model_type, version1=None, version2=None):
     
     logger.info(f"Comparison between {version1} (Dataset Length: {dataset_length1}) and {version2} (Dataset Length: {dataset_length2}):")
     logger.info(table.get_string())  # Log the table as a string
-
-def loadEvaluations(version):
-    evaluations = []
-    directory = os.path.join(BASE_DIRECTORY, version)
-    # Iterate over the files in the directory
-    for filename in os.listdir(directory):
-        if filename.endswith(".json"):
-            file_path = os.path.join(directory, filename)
-            
-            # Load the JSON data from the file
-            with open(file_path, "r") as file:
-                model_data = json.load(file)
-                
-            # Add the model name to the dictionary (assuming the filename represents the model name)
-            model_data["name"] = os.path.splitext(filename)[0].replace("_evaluation", "")
-            
-            # Append the model data to the list
-            evaluations.append(model_data)
-    return evaluations

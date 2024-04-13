@@ -19,6 +19,6 @@ songCollection = getCollection()
 
 # Different methods to get random spread of songs
 #searchByRecommendation(songCollection)
-searchByTrackName(songCollection, 'punk-rock', 'zy')
+searchByTrackName(songCollection, 'german', True) #ended on anime, and the word 5
 
 logger.info("finish")

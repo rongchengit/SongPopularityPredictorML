@@ -6,13 +6,15 @@ import plotly.graph_objects as go
 def generate_plot(df, feature):
     # Calculate number of songs and outliers
     num_songs = len(df[feature])
-    q1, q3 = np.percentile(df[feature], [25, 75])
-    iqr = q3 - q1
-    lower_bound = q1 - 1.5 * iqr
-    upper_bound = q3 + 1.5 * iqr
-    num_outliers = len(df[feature][(df[feature] < lower_bound) | (df[feature] > upper_bound)])
-    outlier_percentage = (num_outliers / num_songs) * 100
-
+    if not feature == 'explicit':
+        q1, q3 = np.percentile(df[feature], [25, 75])
+        iqr = q3 - q1
+        lower_bound = q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+        num_outliers = len(df[feature][(df[feature] < lower_bound) | (df[feature] > upper_bound)])
+        outlier_percentage = (num_outliers / num_songs) * 100
+    else:
+        outlier_percentage = 0
     # Create subplots
     fig = make_subplots(rows=1, cols=3, column_widths=[0.6, 0.2, 0.2], subplot_titles=("Boxplot", "Scatterplot", "Histogram"))
 
@@ -73,8 +75,7 @@ def is_outlier(data, feature):
   upper_bound = Q3 + (1.5 * IQR)
   return (data[feature] < lower_bound) | (data[feature] > upper_bound)
 
-def generateBarChart(valueScore, modelName):
-
+def generateBarChart(valueScore, modelName, label):
     fig = go.Figure(data=[
             go.Bar(
                 x=valueScore,
@@ -88,8 +89,8 @@ def generateBarChart(valueScore, modelName):
         ])
 
     fig.update_layout(
-            title="Comparison of Mean Squared Error (MSE) across Models",
-            xaxis_title="Mean Squared Error (MSE)",
+            title=f"Comparison of {label} across Models",
+            xaxis_title=f"{label}",
             yaxis_title="Model",
             yaxis=dict(autorange="reversed")  # Invert the y-axis to show the best model at the top
         )
@@ -141,3 +142,4 @@ def graphPopularityCorrelations(correlations):
     )
     
     st.plotly_chart(fig)
+

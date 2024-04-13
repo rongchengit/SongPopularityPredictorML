@@ -1,13 +1,6 @@
-import numpy as np
 import streamlit as st
 
-# Load the audioRanges.npy file
-audio_ranges_data = np.load('audioRanges.npy', allow_pickle=True).item()
-
-# Create the audioFeatureRange dictionary using dictionary comprehension
-audioFeatureRange = {attr: {'min': audio_ranges_data[attr][0], 'max': audio_ranges_data[attr][1]} for attr in audio_ranges_data}
-
-def graphFeatureImportance(model, sliders):
+def graphFeatureImportance(model, sliders, audioFeatureRange):
     for audioFeature in model.feature_names_in_:
         if audioFeature == 'explicit' or audioFeature == 'mode':
             # Boolean feature
