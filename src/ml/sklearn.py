@@ -59,13 +59,14 @@ def prepareData(df, selected_version=None):
         #----------------------------------------------------------------
     
     elif selected_version == 'v4': # V4 ==> For every popularity 0 get popularity > 0
-        df_popular = df[df['popularity'] > 0]
-        df_unpopular = df[df['popularity'] == 0]
+        df_popular = df[df['popularity'] > 5]
+        df_unpopular = df[df['popularity'] < 5]
         # Get the number of entities with popularity > 0
         n_popular = len(df_popular)
 
         # Randomly sample entities from the subset with popularity == 0
-        df_sampled_unpopular = df_unpopular.sample(n=n_popular, random_state=42)
+        n_sampled_unpopular = min(n_popular, len(df_unpopular))
+        df_sampled_unpopular = df_unpopular.sample(n=n_sampled_unpopular, random_state=42)
 
         # Combine the subset with popularity > 0 and the sampled subset with popularity == 0
         df_balanced = pd.concat([df_popular, df_sampled_unpopular])

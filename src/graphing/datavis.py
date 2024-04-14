@@ -1,7 +1,10 @@
+import math
+import pandas as pd
 import streamlit as st
 import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import plotly.express as px
 
 def generate_plot(df, feature):
     # Calculate number of songs and outliers
@@ -23,11 +26,6 @@ def generate_plot(df, feature):
 
     # Scatterplot
     fig.add_trace(go.Scatter(x=np.random.normal(0, 0.05, size=len(df[feature])), y=df[feature], mode='markers', marker=dict(size=5, opacity=0.5), showlegend=False), row=1, col=2)
-
-    # Histogram
-    hist, bins = np.histogram(df[feature], bins=20)
-    colors = ['rgba(255, 0, 0, {})'.format(opacity) for opacity in np.linspace(0.2, 1, len(hist))]
-    fig.add_trace(go.Bar(x=[0.5] * len(hist), y=hist, width=0.8, marker=dict(color=colors), orientation='v', showlegend=False), row=1, col=3)
 
     # Text
     fig.update_layout(
@@ -143,3 +141,32 @@ def graphPopularityCorrelations(correlations):
     
     st.plotly_chart(fig)
 
+def generate_report(df, feature):   
+    # Step 1: Calculate min and max values for each feature
+    feature_min = math.floor(df[feature].min())
+    feature_max = math.ceil(df[feature].max())
+
+    # Step 2: Calculate bin size for each feature
+    bin_size = (feature_max - feature_min) / 10
+
+    if bin_size == 0:
+        bin_size = 1
+
+    # Step 3: Create bins for each feature
+    bins = np.arange(feature_min, feature_max + bin_size, bin_size)
+
+    # Step 4: Count the number of songs in each bin for each feature
+    bin_counts = pd.cut(df[feature], bins, include_lowest=True).value_counts().sort_index()
+
+    # Step 5: Create a report DataFrame
+    report_data = []
+    for i, count in enumerate(bin_counts):
+        bin_start = bins[i]
+        bin_end = bins[i+1]
+        report_data.append([f"{bin_start:.2f} - {bin_end:.2f}", count])
+
+    report_df = pd.DataFrame(report_data, columns=["Bin Range", "Song Count"])
+
+    # Step 6: Display the report in Streamlit
+    st.subheader("Song Count per Bin")
+    st.write(report_df)

@@ -1,0 +1,6 @@
+{
+    "Mean Squared Error (MSE)": 517.6861956758829,
+    "Mean Absolute Error (MAE)": 19.565875530876852,
+    "R-squared (R\u00b2)": 0.0865679499715859,
+    "Accuracy (tolerance: 5)": 12.765
+}

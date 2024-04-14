@@ -3,7 +3,7 @@ import streamlit as st
 from src.common.fileManagment import loadEvaluations, loadModel, getVersions, loadNumpyFile
 from src.ml.sklearn import prepareData
 from src.ml.models import ModelType
-from src.graphing.datavis import generate_plot, generateBarChart, graphPopularityCorrelations
+from src.graphing.datavis import generate_plot, generateBarChart, graphPopularityCorrelations, generate_report
 from src.graphing.modelPredictions import graphFeatureImportance, graphRandomForestClassifierConfidence
 from src.graphing.featureImportances import graphLinearRegression, graphGradientBoostingRegressor, graphLinearModels, graphLinearModels, graphSVR
 from sklearn.metrics import classification_report
@@ -148,10 +148,15 @@ with tab5:
     tab5_col1, tab5_col2 = st.columns(2)
     df, x_train, x_test, y_train, y_test, genre_mapping = load_data(selected_version)
     with tab5_col1:
-        genre = st.selectbox("Select Genre", list(genre_mapping.keys()))
-        encoded_genre = genre_mapping[genre]
-        x_combined = pd.concat([x_train[x_train['genre'] == encoded_genre], x_test[x_test['genre'] == encoded_genre]], axis=0)
+        genre = st.selectbox("Select Genre", list(genre_mapping.keys()) + ["ALL"])
+        if genre != "ALL":
+            encoded_genre = genre_mapping[genre]
+            df = df[df['genre'] == encoded_genre]
     with tab5_col2:
-         feature = st.selectbox("Select Feature", x_combined.columns, index=x_combined.columns.tolist().index("energy"))
-
-    generate_plot(x_combined, feature)
+        feature = st.selectbox("Select Feature", df.columns, index=df.columns.tolist().index("energy"))
+        
+    tab5_c1, tab5_c2 = st.columns(2)
+    with tab5_c1:
+        generate_plot(df, feature)
+    with tab5_c2:
+        generate_report(df, feature)
