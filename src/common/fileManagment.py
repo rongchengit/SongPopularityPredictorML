@@ -131,6 +131,24 @@ def loadNumpyFile(suffix, version, model_type=None):
             file_path = os.path.join(directory, filename)
             return np.load(file_path, allow_pickle=True)
 
+def savePickleFile(data, model_type, suffix, version=None):
+    version_directory, version = getVersionDirectory(EVALUATION_RESULTS_DIRECTORY, version)
+    
+    results_filename = f"{model_type}_{suffix}.pkl"
+    full_path = os.path.join(version_directory, results_filename)
+    
+    joblib.dump(full_path, data)
+    
+    logger.debug(f'Results saved to {full_path}')
+
+def loadPickleFile(suffix, version, model_type=None):
+    directory = os.path.join(EVALUATION_RESULTS_DIRECTORY, version)
+    # Iterate over the files in the directory
+    for filename in os.listdir(directory):
+        if filename.endswith(suffix + ".pkl") and (not model_type or filename.startswith(model_type)):
+            file_path = os.path.join(directory, filename)
+            return joblib.load(file_path)
+
 def loadMetadata(version):
     directory = os.path.join(TRAINED_MODELS_DIRECTORY, version)
     # Iterate over the files in the directory

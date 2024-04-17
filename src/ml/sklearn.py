@@ -9,13 +9,14 @@ import pandas as pd
 # Create a logger
 logger = logging.getLogger("dataframe")
 
-def prepareData(df, selected_version=None):
+def prepareData(df, selected_version=None, dropId=True):
     if not selected_version:
         selected_version = getNewVersion()
-        
+    
     # Drop unused Data
     df.drop('_id', axis=1, inplace=True)
-    df.drop('track_id', axis=1, inplace=True)
+    if dropId == True:
+        df.drop('track_id', axis=1, inplace=True)
 
     # Transform Artists
     le_artists = LabelEncoder()
@@ -39,9 +40,9 @@ def prepareData(df, selected_version=None):
         x = df.drop(['popularity'], axis=1)[:100000]
         y = df['popularity'][:100000]
         
-    elif selected_version == 'v2':  # V2 ==> all Data (current 238k)
-        x = df.drop(['popularity'], axis=1)
-        y = df['popularity']
+    elif selected_version == 'v2':  # V2 ==> Subset of total data
+        x = df.drop(['popularity'], axis=1)[:295413]
+        y = df['popularity'][:295413]
 
     elif selected_version == 'v3': # V3 ==> getting rid of outliers/reasonings
     # V3 ==> drop outliers duration_ms (can include whatever you want)
@@ -58,22 +59,14 @@ def prepareData(df, selected_version=None):
         y = df['popularity']
         #----------------------------------------------------------------
     
-    elif selected_version == 'v4': # V4 ==> For every popularity 0 get popularity > 0
-        df_popular = df[df['popularity'] > 5]
-        df_unpopular = df[df['popularity'] < 5]
-        # Get the number of entities with popularity > 0
-        n_popular = len(df_popular)
-
-        # Randomly sample entities from the subset with popularity == 0
-        n_sampled_unpopular = min(n_popular, len(df_unpopular))
-        df_sampled_unpopular = df_unpopular.sample(n=n_sampled_unpopular, random_state=42)
-
-        # Combine the subset with popularity > 0 and the sampled subset with popularity == 0
-        df_balanced = pd.concat([df_popular, df_sampled_unpopular])
-
-        # Split the balanced DataFrame into x and y for testing
-        x = df_balanced.drop(['popularity'], axis=1)
-        y = df_balanced['popularity']
+    elif selected_version == 'v4': # V4 ==> all Data
+        x = df.drop(['popularity'], axis=1)[:343614]
+        y = df['popularity'][:343614]
+    
+    # elif selected_version == 'v5': # V5 ==> all Data
+    #     x = df.drop(['popularity'], axis=1)
+    #     y = df['popularity']
+        
     else:
         raise Exception("Version not yet implemented") 
     #----------------------------------------------------------------
@@ -120,9 +113,9 @@ def recommend_songs(track_id, df, n_recommendations=5):
         # Get the top n recommendations; -2 because the first result is the song itself
         recommended_indices = similarities[0].argsort()[-(n_recommendations+2):-1][::-1]
         
-        # Return the recommended track_ids
-        recommended_track_ids = df.iloc[recommended_indices]['track_id']
-        return recommended_track_ids
+        # Return the recommended tracks
+        recommended_tracks = df.iloc[recommended_indices].squeeze()
+        return recommended_tracks
     else:
         print(f"No track found with ID: {track_id}")
         return []

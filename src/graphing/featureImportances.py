@@ -41,7 +41,7 @@ def graphLinearRegression(model, selected_model_type):
             x=sorted_importances,
             y=sorted_feature_names,
             orientation='h',
-            marker=dict(color=sorted_importances, colorscale='Viridis'),
+            marker=dict(color=sorted_importances, colorscale='Greens'),
             text=[f"{imp:.2f}" for imp in sorted_importances],
             textposition='auto'
         )
@@ -65,7 +65,7 @@ def graphGradientBoostingRegressor(model, selected_model_type):
             x=sorted_importances,
             y=sorted_feature_names,
             orientation='h',
-            marker=dict(color=sorted_importances, colorscale='Viridis'),
+            marker=dict(color=sorted_importances, colorscale='Greens'),
             text=[f"{imp:.2f}" for imp in sorted_importances],
             textposition='auto'
         )
@@ -89,7 +89,7 @@ def graphSVR(model, selected_model_type, result):
             x=sorted_importances,
             y=sorted_feature_names,
             orientation='h',
-            marker=dict(color=sorted_importances, colorscale='Viridis'),
+            marker=dict(color=sorted_importances, colorscale='Greens'),
             text=[f"{imp:.2f} ± {std[i]:.2f}" for i, imp in zip(sorted_indices, sorted_importances)],
             textposition='auto'
         )
@@ -115,7 +115,7 @@ def graphLinearModels(model, selected_model_type):
             x=sorted_importances,
             y=sorted_feature_names,
             orientation='h',
-            marker=dict(color=sorted_importances, colorscale='Viridis'),
+            marker=dict(color=sorted_importances, colorscale='Greens'),
             text=[f"{imp:.2f}" for imp in sorted_importances],
             textposition='auto'
         )

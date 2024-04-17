@@ -6,6 +6,17 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import plotly.express as px
 
+def generate_scatterplot(df, feature):
+    # Assuming you have a DataFrame named 'df' with columns 'loudness' and 'popularity'
+    fig = px.scatter(df, x=feature, y='popularity', color='popularity', color_continuous_scale='Greens', title=f'Correlation between {feature} and Popularity')
+
+    # Update the axis labels
+    fig.update_xaxes(title=feature)
+    fig.update_yaxes(title='Popularity')
+
+    # Display the plot
+    st.plotly_chart(fig)
+
 def generate_plot(df, feature):
     # Calculate number of songs and outliers
     num_songs = len(df[feature])
@@ -19,13 +30,25 @@ def generate_plot(df, feature):
     else:
         outlier_percentage = 0
     # Create subplots
-    fig = make_subplots(rows=1, cols=3, column_widths=[0.6, 0.2, 0.2], subplot_titles=("Boxplot", "Scatterplot", "Histogram"))
+    fig = make_subplots(rows=1, cols=2, column_widths=[0.6, 0.2], subplot_titles=("Boxplot", "Heatmap"))
 
     # Boxplot
-    fig.add_trace(go.Box(y=df[feature], name=feature, showlegend=False, boxpoints=False), row=1, col=1)
+    fig.add_trace(go.Box(y=df[feature], name=feature, showlegend=False, boxpoints=False, marker=dict(color='green')), row=1, col=1)
 
-    # Scatterplot
-    fig.add_trace(go.Scatter(x=np.random.normal(0, 0.05, size=len(df[feature])), y=df[feature], mode='markers', marker=dict(size=5, opacity=0.5), showlegend=False), row=1, col=2)
+    # Heatmap
+    min_val = df[feature].min()
+    max_val = df[feature].max()
+    bins = np.linspace(min_val, max_val, 10)
+    hist, _ = np.histogram(df[feature], bins=bins)
+    hist_normalized = hist / hist.max()
+
+    #fig.add_trace(go.Heatmap(x=np.ones(len(bins)-1),
+    #                        y=bins[:-1],
+    #                        z=hist.reshape(-1, 1),
+    #                        colorscale='Greens',
+    #                        showscale=True,
+    #                        colorbar=dict(title='Count')),
+    #            row=1, col=2)
 
     # Text
     fig.update_layout(
@@ -59,8 +82,6 @@ def generate_plot(df, feature):
     fig.update_xaxes(title_text="Value", row=1, col=1)
     fig.update_xaxes(showticklabels=False, row=1, col=2)
     fig.update_yaxes(showticklabels=False, row=1, col=2)
-    fig.update_xaxes(showticklabels=False, row=1, col=3)
-    fig.update_yaxes(showticklabels=False, row=1, col=3)
 
     # Display the figure
     st.plotly_chart(fig)
@@ -79,7 +100,7 @@ def generateBarChart(valueScore, modelName, label):
                 x=valueScore,
                 y=modelName,
                 orientation='h',
-                marker=dict(color=valueScore, colorscale='Viridis'),
+                marker=dict(color=valueScore, colorscale='Greens'),
                 text=[f"{val:.2f}" for val in valueScore],
                 textposition='auto',
                 name='MSE'
@@ -101,7 +122,7 @@ def graphCorrelations(correlations):
         z=correlations.values,
         x=correlations.columns,
         y=correlations.index,
-        colorscale='Viridis',
+        colorscale='Green',
         zmin=-1,  # Set the minimum value of the color scale to -1
         zmax=1    # Set the maximum value of the color scale to 1
     ))
@@ -128,7 +149,7 @@ def graphPopularityCorrelations(correlations):
         orientation='h',
         marker=dict(
             color=sorted_correlations.values,
-            colorscale='Viridis',
+            colorscale='Greens',
             colorbar=dict(title='Correlation')
         )
     )])
@@ -163,10 +184,12 @@ def generate_report(df, feature):
     for i, count in enumerate(bin_counts):
         bin_start = bins[i]
         bin_end = bins[i+1]
-        report_data.append([f"{bin_start:.2f} - {bin_end:.2f}", count])
+        startmin, startsec = divmod(int(bin_start) / 1000, 60)
+        endmin, endsec = divmod(int(bin_end) / 1000, 60)
+        report_data.append([f"{round(startmin)}:{round(startsec)} - {round(endmin)}:{format(round(endsec), '02d')}", count])
 
     report_df = pd.DataFrame(report_data, columns=["Bin Range", "Song Count"])
 
     # Step 6: Display the report in Streamlit
-    st.subheader("Song Count per Bin")
+    st.markdown("**Song Count per Bin**")
     st.write(report_df)

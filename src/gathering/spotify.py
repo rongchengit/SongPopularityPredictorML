@@ -80,6 +80,10 @@ def addAudioFeatures(song_list):
                 if key in attributes:
                     song[key] = value
 
+def getSongByTrackIds(trackIds):
+    tracks = sp.tracks(trackIds)
+    return {track['id']: track['name'] for track in tracks['tracks']}
+
 def get_randomized_parameters():
     # Generate random min, max, and target values for each attribute
     params = {}

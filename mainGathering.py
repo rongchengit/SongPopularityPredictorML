@@ -18,7 +18,6 @@ logger = logging.getLogger("main")
 songCollection = getCollection()
 
 # Different methods to get random spread of songs
-#searchByRecommendation(songCollection)
-searchByTrackName(songCollection, 'hip-hop', True) #ended on hip hop, and the word yet
+searchByTrackName(songCollection, 'minimal-techno', True) #ended on indie-pop and she
 
 logger.info("finish")

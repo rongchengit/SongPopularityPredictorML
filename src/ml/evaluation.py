@@ -2,20 +2,20 @@ import json
 import os
 import numpy as np
 import logging
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, f1_score
 from prettytable import PrettyTable
 from src.common.fileManagment import EVALUATION_RESULTS_DIRECTORY, getVersions
 
 # Create a logger
 logger = logging.getLogger("evaluation")
 
-TOLERANCE = 5
+TOLERANCE = 0.1
 
 def evaluateModel(model, x, y):
     evaluation_metrics = {}
   
     y_pred = model.predict(x)
-    sklearn_metrics = sklearnEvaluations(y_pred, y)
+    sklearn_metrics = sklearnEvaluations(y_pred, y, x)
     accuracy_metric = accuracyEvaluation(y_pred, y)
 
     evaluation_metrics.update(sklearn_metrics)
@@ -30,20 +30,28 @@ def accuracyEvaluation(y_pred, y):
     # Calculate the percentage of correct predictions
     correct_percentage = np.mean(correct_predictions) * 100
 
-    logger.info(f'Accuracy (tolerance: {TOLERANCE}): {correct_percentage:.2f}%')
+    logger.info(f'Accuracy: {correct_percentage:.2f}%')
 
-    return {'Accuracy (tolerance: {})'.format(TOLERANCE): correct_percentage}
+    return {'Accuracy': correct_percentage}
 
-def sklearnEvaluations(y_pred, y_test):
+def sklearnEvaluations(y_pred, y_test, x_test):
     mse = mean_squared_error(y_test, y_pred)
+    rmse = np.sqrt(mse)
     mae = mean_absolute_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
+    n = len(y_test)  # Number of samples
+    p = x_test.shape[1]  # Number of features
+    adjusted_r2 = 1 - ((1 - r2) * (n - 1) / (n - p - 1))
+    n_bins = 10  # Number of bins (sqrt of total number of samples ==> popularity 0 - 100)
+    bins = np.linspace(y_test.min(), y_test.max(), n_bins + 1)
 
-    logger.info(f"Mean Squared Error (MSE): {mse}")
-    logger.info(f"Mean Absolute Error (MAE): {mae}")
-    logger.info(f"R-squared (R²): {r2}")
+    y_test_binned = np.digitize(y_test, bins)
+    y_pred_binned = np.digitize(y_pred, bins)
+    f1 = f1_score(y_test_binned, y_pred_binned, average= 'micro')
 
-    return {'Mean Squared Error (MSE)': mse, 'Mean Absolute Error (MAE)': mae, 'R-squared (R²)': r2}
+    logger.info(f"Mean Squared Error (MSE): {mse}, Root Mean Squared Error (RMSE): {rmse}, Mean Absolute Error (MAE): {mae}, R-squared (R²): {r2}, Adjusted R-squared: {adjusted_r2}, F1-Score: {f1}")
+
+    return {'Mean Squared Error (MSE)': mse, 'Root Mean Squared Error (RMSE)': rmse, 'Mean Absolute Error (MAE)': mae, 'R-squared (R²)': r2, 'Adjusted R-squared (aR²)': adjusted_r2, 'F-Statistic (F1)': f1}
 
 
 def compareEvaluations(model_type, version1=None, version2=None):
