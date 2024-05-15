@@ -14,3 +14,9 @@ This package contains all the code for calling the spotify API to gather all nec
 
 ### ML Training
 This package contains all the code for our machine learning algorithms which take data from the database and make the popularity predications.
+
+## How to start the project
+Change the Spotify Client ID in the spotify.py to your own from https://developer.spotify.com/dashboard
+Add SPOTIFY_SECRET as a environment variable
+
+spotifyRec.AudioFeatures.json has all the nessecary data that can be imported into mongoDB for the data visualization

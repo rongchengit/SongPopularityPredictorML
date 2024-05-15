@@ -35,17 +35,27 @@ def prepareData(df, selected_version=None, dropId=True):
     # Logging
     logging.debug(f"\n{df.head().to_string()}")
 
-    # V1 ==> Subset of total data
     if selected_version == 'v1':
         x = df.drop(['popularity'], axis=1)[:100000]
         y = df['popularity'][:100000]
         
-    elif selected_version == 'v2':  # V2 ==> Subset of total data
-        x = df.drop(['popularity'], axis=1)[:295413]
-        y = df['popularity'][:295413]
+    elif selected_version == 'v2':
+        x = df.drop(['popularity'], axis=1)[:200000]
+        y = df['popularity'][:200000]
+    
+    elif selected_version == 'v3':
+        x = df.drop(['popularity'], axis=1)[:300000]
+        y = df['popularity'][:300000]
+    
+    elif selected_version == 'v4':
+        x = df.drop(['popularity'], axis=1)[:400000]
+        y = df['popularity'][:400000]
 
-    elif selected_version == 'v3': # V3 ==> getting rid of outliers/reasonings
-    # V3 ==> drop outliers duration_ms (can include whatever you want)
+    elif selected_version == 'v5':
+        x = df.drop(['popularity'], axis=1)
+        y = df['popularity']
+
+    elif selected_version == 'v6': # ==> getting rid of outliers/reasonings
         Q1 = df['duration_ms'].quantile(0.25)
         Q3 = df['duration_ms'].quantile(0.75)
         IQR = Q3 - Q1
@@ -57,25 +67,15 @@ def prepareData(df, selected_version=None, dropId=True):
         df = df[~((df['duration_ms'] < (Q1 - outlier_threshold * IQR)) | (df['duration_ms'] > (Q3 + outlier_threshold * IQR)))]
         x = df.drop(['popularity'], axis=1)
         y = df['popularity']
-        #----------------------------------------------------------------
     
-    elif selected_version == 'v4': # V4 ==> all Data
-        x = df.drop(['popularity'], axis=1)[:343614]
-        y = df['popularity'][:343614]
-    
-    # elif selected_version == 'v5': # V5 ==> all Data
-    #     x = df.drop(['popularity'], axis=1)
-    #     y = df['popularity']
+    elif selected_version == 'v7': # ==> specialized df by genre
+        df = df[df['genre'] == 'anime'] 
+        x = df.drop(['popularity'], axis=1)
+        y = df['popularity']
         
     else:
         raise Exception("Version not yet implemented") 
-    #----------------------------------------------------------------
-    
-    # V5 ==> Drop low correlation variables
-    # df.drop('someColumn') # TODO what columns to drop?
-    # x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42) 
 
-    #----------------------------------------------------------------
     logging.debug(f"Preparing {selected_version} with Dataset Len: {len(x)}")
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
     return df, x_train, x_test, y_train, y_test, genre_mapping
@@ -87,27 +87,27 @@ def trainModel(x, y, modelType):
     return model
 
 def recommend_songs(track_id, df, n_recommendations=5):
-
+    internalDf = df.copy()
     # Example weights (make sure to align these with your actual feature columns)
     weights = {
-        'loudness': 2.0,
-        'tempo': 2.0,
-        'acousticness': 2.0,
+        'genre': 4,
+        'artists': 6,
+        'popularity': 3
     }
 
     # Assuming `df` is your DataFrame containing the feature columns
     for feature, weight in weights.items():
-        df[feature] *= weight
+        internalDf[feature] *= weight
     
     # Filter out the row with the given track_id
-    input_features = df[df['track_id'] == track_id].drop(['track_id'], axis=1)
+    input_features = internalDf[internalDf['track_id'] == track_id].drop(['track_id'], axis=1)
 
     # Make sure input_features is numeric and in the correct format for cosine_similarity
     if not input_features.empty:
         input_features = input_features.apply(pd.to_numeric, errors='coerce').fillna(0)
         
         # Compute similarities
-        df_numeric = df.drop(['track_id'], axis=1).apply(pd.to_numeric, errors='coerce').fillna(0)
+        df_numeric = internalDf.drop(['track_id'], axis=1).apply(pd.to_numeric, errors='coerce').fillna(0)
         similarities = cosine_similarity(input_features, df_numeric)
         
         # Get the top n recommendations; -2 because the first result is the song itself

@@ -1,19 +1,18 @@
 from pymongo import MongoClient, ASCENDING
 import logging
+import os
 from src.common.fileManagment import getVersions, loadMetadata
 
 # Create a logger
 logger = logging.getLogger("db")
 
 def getCollection():
-    # Create a connection using MongoClient. This will connect to the default host and port.
-    client = MongoClient()
-
-    # Access database
-    spotifyDB = client['SpotifyRec']  # Replace 'mydatabase' with your database name
-
-    # Access collection of the database
-    return spotifyDB['RawSpotifySongs']  # Replace 'mycollection' with your collection name
+    if os.environ.get("ATLAS_PASSWORD"):
+        client = MongoClient("mongodb+srv://rcrongc:" + os.environ.get("ATLAS_PASSWORD") + "@bublifymlcluster.ojxutzi.mongodb.net/?retryWrites=true&w=majority&appName=bublifyMLCluster")
+    else:
+        client = MongoClient()
+    spotifyDB = client['SpotifyRec']
+    return spotifyDB['AudioFeatures']
 
 # Function to add a song if it doesn't exist in the database
 def add_song_if_not_exists(collection, song_data):
@@ -37,5 +36,8 @@ def loadDBData(version: None):
     metadata = loadMetadata(version)
 
     songCollection = getCollection()
-    return list(songCollection.find().sort([("$natural", ASCENDING)]).limit(metadata.get('datasetLen')))
+    if os.environ.get("CLOUD"):
+        return list(songCollection.find().sort([("$natural", ASCENDING)]).limit(1000)) # Limit due to free tier hardware constraints
+    else:
+        return list(songCollection.find().sort([("$natural", ASCENDING)]).limit(metadata.get('datasetLen')))
     

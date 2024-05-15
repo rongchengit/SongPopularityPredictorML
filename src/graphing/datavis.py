@@ -168,7 +168,10 @@ def generate_report(df, feature):
     feature_max = math.ceil(df[feature].max())
 
     # Step 2: Calculate bin size for each feature
-    bin_size = (feature_max - feature_min) / 10
+    if feature == 'explicit' or feature == 'mode':
+        bin_size = 1/2
+    else:
+        bin_size = (feature_max - feature_min) / 10
 
     if bin_size == 0:
         bin_size = 1
@@ -184,10 +187,21 @@ def generate_report(df, feature):
     for i, count in enumerate(bin_counts):
         bin_start = bins[i]
         bin_end = bins[i+1]
-        startmin, startsec = divmod(int(bin_start) / 1000, 60)
-        endmin, endsec = divmod(int(bin_end) / 1000, 60)
-        report_data.append([f"{round(startmin)}:{round(startsec)} - {round(endmin)}:{format(round(endsec), '02d')}", count])
-
+        if feature == 'duration_ms':
+            startmin, startsec = divmod(int(bin_start) / 1000, 60)
+            endmin, endsec = divmod(int(bin_end) / 1000, 60)
+            report_data.append([f"{round(startmin)}:{round(startsec)} - {round(endmin)}:{format(round(endsec), '02d')}", count])
+        else:
+            if feature == 'explicit' or feature == 'mode':
+                if bin_start == 0:
+                    value = False
+                else:
+                    value = True
+                report_data.append([f"{value}", count])
+            elif feature_min >= 0 and feature_max <= 1:
+                report_data.append([f"{round(bin_start, 1)} - {round(bin_end, 1)}", count])
+            else:
+                report_data.append([f"{round(bin_start)} - {round(bin_end)}", count])
     report_df = pd.DataFrame(report_data, columns=["Bin Range", "Song Count"])
 
     # Step 6: Display the report in Streamlit

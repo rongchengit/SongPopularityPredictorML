@@ -2,13 +2,14 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import logging
 import random
+import os
 
 # Create a logger
 logger = logging.getLogger("spotify")
 
 # Spotify Web Credentials
 client_id = '7b9f51495f7548ea97e37c0f5efc98fe'
-client_secret = '35874886cf3e4b52841bbb2f6c04e7fc'
+client_secret = os.environ.get("SPOTIFY_SECRET")
 
 # Constants
 TRACK_ID = "track_id"
@@ -82,7 +83,7 @@ def addAudioFeatures(song_list):
 
 def getSongByTrackIds(trackIds):
     tracks = sp.tracks(trackIds)
-    return {track['id']: track['name'] for track in tracks['tracks']}
+    return {track['id']: {'songName': track['name'], 'artists': ', '.join([artist['name'] for artist in track['artists']])} for track in tracks['tracks']}
 
 def get_randomized_parameters():
     # Generate random min, max, and target values for each attribute

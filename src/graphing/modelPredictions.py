@@ -60,10 +60,10 @@ def graphFeatureImportance(model, sliders, audioFeatureRange):
                         default_value=median_value,
                         step=1,
                         height=300,
-                        thumb_shape="square",
+                        thumb_shape="circle",
                         track_color="green",
-                        slider_color='lighgray',
-                        thumb_color="blue",
+                        slider_color='rgba(228, 224, 216)',
+                        thumb_color="rgba(59, 245, 9)",
                         value_always_visible=True
                     )
             else:
@@ -79,10 +79,10 @@ def graphFeatureImportance(model, sliders, audioFeatureRange):
                         step = (max_value-min_value) / 50,
                         default_value=median_value,
                         height=300,
-                        thumb_shape="square",
+                        thumb_shape="circle",
                         track_color="green",
-                        slider_color='lighgray',
-                        thumb_color="blue",
+                        slider_color='rgba(228, 224, 216)',
+                        thumb_color="rgba(59, 245, 9)",
                         value_always_visible=True
                     )
             sliders[audioFeature] = ing_slider

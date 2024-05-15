@@ -7,7 +7,7 @@ def graphModelFitting(model_names, x_value, y_value, metric):
             x=x_value,
             y=[model + '_' + metric for model in model_names],
             orientation='h',
-               marker=dict(color='rgba(255,223,186, 0.8)'),
+               marker=dict(color='rgba(59, 245, 9, 0.8)'),
             text=[f"{val:.2f}" for val in x_value],
             textfont=dict(size=12, family='Arial Black'),
             textposition='auto',
@@ -17,7 +17,7 @@ def graphModelFitting(model_names, x_value, y_value, metric):
             x=y_value,
             y=[model + '_' + metric for model in model_names],
             orientation='h',
-            marker=dict(color='rgba(186,255,201, 0.8)'),
+            marker=dict(color='rgba(0,68,27, 0.8)'),
             text=[f"{val:.2f}" for val in y_value],
             textfont=dict(size=12, family='Arial Black'),
             textposition='auto',
@@ -26,7 +26,7 @@ def graphModelFitting(model_names, x_value, y_value, metric):
     ])
 
     fig.update_layout(
-        title=f"Comparison of Accuracy across Models",
+        title=f"Comparison of {metric} across Models",
         xaxis_title="Error",
         yaxis_title="Model",
         yaxis=dict(autorange="reversed"),  # Invert the y-axis to show the best model at the top

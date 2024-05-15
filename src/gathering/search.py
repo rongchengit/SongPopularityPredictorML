@@ -45,7 +45,7 @@ def searchByTrackName(songCollection, targetGenre=None, byWord=False, start_comb
                 # List of lowercase letters
                 letters = generate_two_letter_combos(start_combo)
             else:
-                letters = wordfreq.top_n_list("en", 1000)
+                letters = wordfreq.top_n_list("en", 2000)[2000:3000]
     
             for letter in letters:
                 try:

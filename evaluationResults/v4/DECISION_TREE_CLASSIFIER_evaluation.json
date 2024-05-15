@@ -1,9 +1,9 @@
 {
-    "Mean Squared Error (MSE)": 552.3028825866159,
-    "Root Mean Squared Error (RMSE)": 23.501125134482727,
-    "Mean Absolute Error (MAE)": 17.66169986758436,
-    "R-squared (R\u00b2)": -0.37129088433192736,
-    "Adjusted R-squared (aR\u00b2)": -0.3716301892592784,
-    "F-Statistic (F1)": 0.26202290354029945,
-    "Accuracy": 6.6775315396592125
+    "Mean Squared Error (MSE)": 551.5213875,
+    "Root Mean Squared Error (RMSE)": 23.484492489726065,
+    "Mean Absolute Error (MAE)": 17.8358125,
+    "R-squared (R\u00b2)": -0.4034292595299396,
+    "Adjusted R-squared (aR\u00b2)": -0.4037275553641524,
+    "F-Statistic (F1)": 0.2489375,
+    "Accuracy": 5.94
 }

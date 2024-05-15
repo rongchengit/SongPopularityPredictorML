@@ -32,9 +32,6 @@ while True:
     df, x_train, x_test, y_train, y_test, genre = prepareData(df)
     version = getNewVersion()
 
-    # Get Recommended Songs (has nothing to do with mainTraining)
-    # logger.info(recommend_songs('6UFhNbE4sLRUoM52kC4Xl4', df))
-
     # Loop through all wanted models
     for modelType in MODEL_TYPES:
         logger.info("=========================")
