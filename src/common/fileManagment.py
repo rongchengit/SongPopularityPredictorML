@@ -88,7 +88,7 @@ def loadModel(name, version=None):
     full_path = os.path.join(version_directory, model_filename)
     
     if os.path.exists(full_path):
-        model = joblib.load(full_path)
+        model = joblib.load(full_path, mmap_mode='r')
         logger.info(f'Model loaded from {full_path}')
         return model, version
     else:

@@ -28,6 +28,12 @@ logging.basicConfig(level=logging.INFO,
 # Create a logger
 logger = logging.getLogger("main")
 
+def get_model_type_options():
+    if os.environ.get("CLOUD"):
+        return [member.name for member in ModelType if member != ModelType.RANDOM_FOREST_CLASSIFIER and member != ModelType.RANDOM_FOREST_REGRESSOR]
+    else:
+        return [member.name for member in ModelType]
+
 @st.cache_resource
 def load_model(selected_model_type, selected_version):
     if os.environ.get("CLOUD"):
@@ -58,7 +64,7 @@ st.markdown("Correlations between Song Popularity and Their Audio Features using
 
 col2 = st.columns([2, 1, 7])
 with col2[0]:
-    selected_model_type = st.selectbox("Select Model Type", [member.name for member in ModelType]) # TODO make this only available in tab2 and tab4
+    selected_model_type = st.selectbox("Select Model Type", get_model_type_options()) # TODO make this only available in tab2 and tab4
 with col2[1]:
     selected_version= st.selectbox("Select Version", getVersions())
 

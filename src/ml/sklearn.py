@@ -69,7 +69,7 @@ def prepareData(df, selected_version=None, dropId=True):
         y = df['popularity']
     
     elif selected_version == 'v7': # ==> specialized df by genre
-        df = df[df['genre'] == 'anime'] 
+        df = df[df['genre'] == 5] # 5 represents Anime, see genre_mapping for conversion between genre (string) and genre (number) 
         x = df.drop(['popularity'], axis=1)
         y = df['popularity']
         
