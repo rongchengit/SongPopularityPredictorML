@@ -165,7 +165,7 @@ def savePickleFile(data, model_type, suffix, version=None):
     results_filename = f"{model_type}_{suffix}.pkl"
     full_path = os.path.join(version_directory, results_filename)
     
-    joblib.dump(full_path, data)
+    joblib.dump(data, full_path)
     
     logger.debug(f'Results saved to {full_path}')
 

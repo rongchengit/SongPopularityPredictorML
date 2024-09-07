@@ -1,0 +1,9 @@
+{
+    "Mean Squared Error (MSE)": 94.82935467380817,
+    "Root Mean Squared Error (RMSE)": 9.738036489652735,
+    "Mean Absolute Error (MAE)": 7.186540364574257,
+    "R-squared (R\u00b2)": 0.7524000799854665,
+    "Adjusted R-squared (aR\u00b2)": 0.7523518762470731,
+    "F-Statistic (F1)": 0.46763759603384514,
+    "Accuracy": 0.9949736085826493
+}
