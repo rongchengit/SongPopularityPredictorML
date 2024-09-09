@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO,
 # Create a logger
 logger = logging.getLogger("main")
 
-counter = 4
+counter = 0
 while True:
     counter = counter + 1
     version = f'v{counter}'

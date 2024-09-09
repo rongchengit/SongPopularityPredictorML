@@ -178,12 +178,12 @@ def loadPickleFile(suffix, version, model_type=None):
             return joblib.load(file_path)
 
 def loadMetadata(version):
-    response = s3.get_object(Bucket=bucket_name, Key=version + '/' + 'metadata.json')
-    # Read the object content
-    object_content = response['Body'].read()
-
-    # Create a BytesIO object from the content
-    content_stream = BytesIO(object_content)
-
-    # Load the JSON data from the BytesIO object
-    return json.load(content_stream)
+    directory = os.path.join(TRAINED_MODELS_DIRECTORY, version)
+    # Iterate over the files in the directory
+    for filename in os.listdir(directory):
+        if filename.endswith("metadata.json"):
+            file_path = os.path.join(directory, filename)
+            
+            # Load the JSON data from the file
+            with open(file_path, "r") as file:
+                return json.load(file)
