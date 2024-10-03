@@ -18,5 +18,3 @@ This package contains all the code for our machine learning algorithms which tak
 ## How to start the project
 Change the Spotify Client ID in the spotify.py to your own from https://developer.spotify.com/dashboard
 Add SPOTIFY_SECRET as a environment variable
-
-spotifyRec.AudioFeatures.json has all the nessecary data that can be imported into mongoDB for the data visualization
